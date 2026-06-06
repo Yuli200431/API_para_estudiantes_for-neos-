@@ -1,3 +1,3 @@
-module API_para_estudiantes_for-neos-
+module for-neos-api
 
 go 1.26.2
