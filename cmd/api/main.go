@@ -1,6 +1,11 @@
 package main
-import ()
+
+import "for-neos-api/internal/vivienda/storage"
 
 func main() {
-	println("Hello, Foraneos!")
+	memoria := storage.NuevaMemoria()
+
+	memoria.SeedViviendas()
+
+	println(len(memoria.ListarViviendas()))
 }
