@@ -7,14 +7,14 @@ import (
 )
 
 type MemoriaTransporte struct {
-	rutas []models.Transporte
+	rutas  []models.Transporte
 	nextID uint
-	mu    sync.Mutex
+	mu     sync.Mutex
 }
 
 func NuevaMemoriaTransporte() *MemoriaTransporte {
 	return &MemoriaTransporte{
-		rutas: []models.Transporte{},
+		rutas:  []models.Transporte{},
 		nextID: 1,
 	}
 }
@@ -30,7 +30,7 @@ func (m *MemoriaTransporte) SeedTransportes() {
 	}
 }
 
-//Listar todas las rutas
+// Listar todas las rutas
 func (m *MemoriaTransporte) ListarRutas() []models.Transporte {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -38,4 +38,26 @@ func (m *MemoriaTransporte) ListarRutas() []models.Transporte {
 	copia := make([]models.Transporte, len(m.rutas))
 	copy(copia, m.rutas)
 	return copia
+}
+
+func (m *MemoriaTransporte) ObtenerRutaPorID(id uint) (models.Transporte, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, p := range m.rutas {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.Transporte{}, false
+}
+
+func (m *MemoriaTransporte) AgregarRuta(ruta models.Transporte) models.Transporte {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	ruta.ID = m.nextID
+	m.nextID++
+	m.rutas = append(m.rutas, ruta)
+	return ruta
 }
