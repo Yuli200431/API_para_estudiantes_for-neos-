@@ -1,11 +1,43 @@
 package main
 
-import "for-neos-api/internal/vivienda/storage"
+import (
+	"log"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+
+	"for-neos-api/internal/vivienda/handlers"
+	"for-neos-api/internal/vivienda/storage"
+)
 
 func main() {
 	memoria := storage.NuevaMemoria()
 
 	memoria.SeedViviendas()
+	memoria.SeedFotos()
+	memoria.SeedSectores()
+	// 2. Crear el Server inyectándole el almacenamiento.
+	servidor := handlers.NewServer(memoria)
 
-	println(len(memoria.ListarViviendas()))
+	// 3. Configurar el router con versionado /api/v1/.
+	r := chi.NewRouter()
+
+	r.Route("/api/v1", func(r chi.Router) {
+		// Viviendas: CRUD completo.
+		r.Get("/viviendas", servidor.ListarViviendas)
+		r.Post("/viviendas", servidor.CrearVivienda)
+		r.Get("/viviendas/{id}", servidor.ObtenerVivienda)
+		r.Put("/viviendas/{id}", servidor.ActualizarVivienda)
+		r.Delete("/viviendas/{id}", servidor.BorrarVivienda)
+
+		// Fotos: CRUD completo.
+		r.Get("/fotos", servidor.ListarFotos)
+		r.Post("/fotos", servidor.CrearFoto)
+		r.Get("/fotos/{id}", servidor.ObtenerFoto)
+		r.Put("/fotos/{id}", servidor.ActualizarFoto)
+		r.Delete("/fotos/{id}", servidor.BorrarFoto)
+	})
+
+	log.Println("Servidor escuchando en http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
