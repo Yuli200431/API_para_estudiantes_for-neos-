@@ -39,15 +39,18 @@ func NuevaMemoria() *Memoria {
 }
 
 // VIVIENDAS
-
+// SeedViviendas carga categorías iniciales que coinciden con ViviendaID de las viviendas pre-cargados.
 func (m *Memoria) SeedViviendas() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
+	si := true
+	no := false
+
 	m.viviendas = []models.Vivienda{
-		{ViviendaID: 1, Titulo: "Casa Amarilla", TipoVivienda: "Casa", Precio: 120, Estado: "Disponible", SectorID: 1, ProveedorID: 1},
-		{ViviendaID: 2, Titulo: "Suite de Lujo", TipoVivienda: "Departamento", Precio: 200, Estado: "Ocupado", SectorID: 1, ProveedorID: 1},
-		{ViviendaID: 3, Titulo: "Departamento en el Centro", TipoVivienda: "Departamento", Precio: 150, Estado: "Disponible", SectorID: 2, ProveedorID: 2},
+		{ViviendaID: 1, Titulo: "Casa Amarilla", TipoVivienda: "Casa", Precio: 120.0, Garantia: &si, Luz: &si, Agua: &si, Amueblado: &no, Internet: &si, BañoPrivado: &si, NumeroHabitaciones: 3, Mascotas: &no, GeneroPreferido: "Ambos", ReglasConvivencia: "No se permite fumar", Telefono: "123456789", Email: "casaamarilla@gmail.com", Estado: "Disponible", Comentario: "Excelente ubicación", SectorID: 1, ProveedorID: 1},
+		{ViviendaID: 2, Titulo: "Suite de Lujo", TipoVivienda: "Departamento", Precio: 200.0, Garantia: &si, Luz: &no, Agua: &si, Amueblado: &si, Internet: &si, BañoPrivado: &si, NumeroHabitaciones: 2, Mascotas: &no, GeneroPreferido: "Ambos", ReglasConvivencia: "No se permite fumar", Telefono: "123456789", Email: "suelujo@gmail.com", Estado: "Ocupado", Comentario: "Suite con vista panorámica", SectorID: 1, ProveedorID: 1},
+		{ViviendaID: 3, Titulo: "Departamento en el Centro", TipoVivienda: "Departamento", Precio: 150.0, Garantia: &no, Luz: &si, Agua: &si, Amueblado: &no, Internet: &si, BañoPrivado: &si, NumeroHabitaciones: 1, Mascotas: &no, GeneroPreferido: "Femenino", ReglasConvivencia: "No se permite fumar", Telefono: "123456789", Email: "departamentocentro@gmail.com", Estado: "Disponible", Comentario: "Departamento en el corazón de la ciudad", SectorID: 2, ProveedorID: 2},
 	}
 	m.nextViviendaID = 4
 }
@@ -91,8 +94,8 @@ func (m *Memoria) ActualizarVivienda(id int, datos models.Vivienda) (models.Vivi
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	for i, c := range m.viviendas {
-		if c.ViviendaID == id {
+	for i, v := range m.viviendas {
+		if v.ViviendaID == id {
 			datos.ViviendaID = id
 			m.viviendas[i] = datos
 			return datos, true
@@ -106,8 +109,8 @@ func (m *Memoria) BorrarVivienda(id int) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	for i, p := range m.viviendas {
-		if p.ViviendaID == id {
+	for i, v := range m.viviendas {
+		if v.ViviendaID == id {
 			m.viviendas = append(m.viviendas[:i], m.viviendas[i+1:]...)
 			return true
 		}
