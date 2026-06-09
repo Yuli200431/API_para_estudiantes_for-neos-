@@ -20,7 +20,7 @@ func (s *Server) ListarFotos(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(fotos); err != nil {
-		log.Printf("error codificando JSON: %v", err)
+		log.Printf("Error codificando JSON: %v", err)
 	}
 }
 
@@ -28,20 +28,20 @@ func (s *Server) ListarFotos(w http.ResponseWriter, _ *http.Request) {
 func (s *Server) ObtenerFoto(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "id debe ser un número entero", http.StatusBadRequest)
+		http.Error(w, "El Id debe ser un número entero", http.StatusBadRequest)
 		return
 	}
 
 	foto, encontrado := s.Storage.BuscarFotoPorID(id)
 	if !encontrado {
-		http.Error(w, "foto no encontrada", http.StatusNotFound)
+		http.Error(w, "Foto no encontrada", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(foto); err != nil {
-		log.Printf("error codificando JSON: %v", err)
+		log.Printf("Error codificando JSON: %v", err)
 	}
 }
 
@@ -53,11 +53,11 @@ func (s *Server) CrearFoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if strings.TrimSpace(nueva.URL) == "" {
-		http.Error(w, "el campo url es obligatorio", http.StatusBadRequest)
+		http.Error(w, "El campo URL es obligatorio", http.StatusBadRequest)
 		return
 	}
 	if nueva.ViviendaID < 0 {
-		http.Error(w, "el id de la vivienda no puede ser negativo", http.StatusBadRequest)
+		http.Error(w, "El Id de la Vivienda debe ser un número entero positivo", http.StatusBadRequest)
 		return
 	}
 
@@ -66,7 +66,7 @@ func (s *Server) CrearFoto(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(creado); err != nil {
-		log.Printf("error codificando JSON: %v", err)
+		log.Printf("Error codificando JSON: %v", err)
 	}
 }
 
@@ -74,7 +74,7 @@ func (s *Server) CrearFoto(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ActualizarFoto(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "id debe ser un número entero", http.StatusBadRequest)
+		http.Error(w, "El Id debe ser un número entero", http.StatusBadRequest)
 		return
 	}
 
@@ -84,24 +84,24 @@ func (s *Server) ActualizarFoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if strings.TrimSpace(datos.URL) == "" {
-		http.Error(w, "el campo url es obligatorio", http.StatusBadRequest)
+		http.Error(w, "El campo URL es obligatorio", http.StatusBadRequest)
 		return
 	}
 	if datos.ViviendaID < 0 {
-		http.Error(w, "el id de la vivienda no puede ser negativo", http.StatusBadRequest)
+		http.Error(w, "El Id de la Vivienda debe ser un número entero positivo", http.StatusBadRequest)
 		return
 	}
 
 	actualizado, encontrado := s.Storage.ActualizarFoto(id, datos)
 	if !encontrado {
-		http.Error(w, "foto no encontrada", http.StatusNotFound)
+		http.Error(w, "Foto no fueencontrada", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(actualizado); err != nil {
-		log.Printf("error codificando JSON: %v", err)
+		log.Printf("Error codificando JSON: %v", err)
 	}
 }
 
@@ -109,12 +109,12 @@ func (s *Server) ActualizarFoto(w http.ResponseWriter, r *http.Request) {
 func (s *Server) BorrarFoto(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "id debe ser un número entero", http.StatusBadRequest)
+		http.Error(w, "El Id debe ser un número entero", http.StatusBadRequest)
 		return
 	}
 
 	if !s.Storage.BorrarFoto(id) {
-		http.Error(w, "Foto no encontrada", http.StatusNotFound)
+		http.Error(w, "Foto no fue encontrada", http.StatusNotFound)
 		return
 	}
 

@@ -20,7 +20,7 @@ func (s *Server) ListarSectores(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(sectores); err != nil {
-		log.Printf("error codificando JSON: %v", err)
+		log.Printf("Error codificando JSON: %v", err)
 	}
 }
 
@@ -28,7 +28,7 @@ func (s *Server) ListarSectores(w http.ResponseWriter, _ *http.Request) {
 func (s *Server) ObtenerSector(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "id debe ser un número entero", http.StatusBadRequest)
+		http.Error(w, "El Id debe ser un número entero", http.StatusBadRequest)
 		return
 	}
 
@@ -41,7 +41,7 @@ func (s *Server) ObtenerSector(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(sector); err != nil {
-		log.Printf("error codificando JSON: %v", err)
+		log.Printf("Error codificando JSON: %v", err)
 	}
 }
 
@@ -53,7 +53,7 @@ func (s *Server) CrearSector(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if strings.TrimSpace(nuevo.Nombre) == "" {
-		http.Error(w, "el campo nombre es obligatorio", http.StatusBadRequest)
+		http.Error(w, "El campo Nombre es obligatorio", http.StatusBadRequest)
 		return
 	}
 
@@ -62,7 +62,7 @@ func (s *Server) CrearSector(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(creado); err != nil {
-		log.Printf("error codificando JSON: %v", err)
+		log.Printf("Error codificando JSON: %v", err)
 	}
 }
 
@@ -70,7 +70,7 @@ func (s *Server) CrearSector(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ActualizarSector(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "id debe ser un número entero", http.StatusBadRequest)
+		http.Error(w, "El Id debe ser un número entero", http.StatusBadRequest)
 		return
 	}
 
@@ -80,20 +80,20 @@ func (s *Server) ActualizarSector(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if strings.TrimSpace(datos.Nombre) == "" {
-		http.Error(w, "el campo nombre es obligatorio", http.StatusBadRequest)
+		http.Error(w, "El campo Nombre es obligatorio", http.StatusBadRequest)
 		return
 	}
 
 	actualizado, encontrado := s.Storage.ActualizarSector(id, datos)
 	if !encontrado {
-		http.Error(w, "Sector no encontrado", http.StatusNotFound)
+		http.Error(w, "Sector no fue encontrado", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(actualizado); err != nil {
-		log.Printf("error codificando JSON: %v", err)
+		log.Printf("Error codificando JSON: %v", err)
 	}
 }
 
@@ -101,12 +101,12 @@ func (s *Server) ActualizarSector(w http.ResponseWriter, r *http.Request) {
 func (s *Server) BorrarSector(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "id debe ser un número entero", http.StatusBadRequest)
+		http.Error(w, "El Id debe ser un número entero", http.StatusBadRequest)
 		return
 	}
 
 	if !s.Storage.BorrarSector(id) {
-		http.Error(w, "Sector no encontrado", http.StatusNotFound)
+		http.Error(w, "Sector no fue encontrado", http.StatusNotFound)
 		return
 	}
 
