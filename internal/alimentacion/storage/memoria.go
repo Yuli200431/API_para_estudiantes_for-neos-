@@ -3,12 +3,16 @@ package storage
 import (
 	"sync"
 	"for-neos-api/internal/alimentacion/models"
+	
 )
 
 
 type Memoria struct{
 	alimentaciones []models.Alimentacion
 	nextAlimentacionID int
+
+	menuDiarios []models.MenuDiario
+	nextMenuDiarioID int
     
 	mu sync.Mutex
 }
@@ -17,6 +21,10 @@ func NewMemoria() *Memoria {
 	return &Memoria{
 		alimentaciones: []models.Alimentacion{},
 		nextAlimentacionID: 1,
+
+		menuDiarios: []models.MenuDiario{},
+		nextMenuDiarioID: 1,
+	
 	}
 } 
 
@@ -109,6 +117,85 @@ func (m *Memoria) BorrarAlimentacion(id int) bool {
 	for i, a := range m.alimentaciones {
 		if a.ID == id {
 			m.alimentaciones = append(m.alimentaciones[:i], m.alimentaciones[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
+/// MENU DIARIOS ///
+
+// Seed de MenuDiarios
+func (m *Memoria) SeedMenuDiarios() {
+	m.mu.Lock()
+	defer m.mu.Unlock()	
+	m.menuDiarios = []models.MenuDiario{
+		{
+			ID:             1,	
+			Fecha:          "2024-10-01",
+			AlimentacionID: 1,
+		},
+		{
+			ID:             2,
+			Fecha:          "2024-10-02",
+			AlimentacionID: 2,
+		},
+	}
+	m.nextMenuDiarioID = 3
+}
+
+// ListarMenuDiarios devuelve todos los menús diarios
+func (m *Memoria) ListarMenuDiarios() []models.MenuDiario {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	copia := make([]models.MenuDiario, len(m.menuDiarios))
+	copy(copia, m.menuDiarios)
+	return copia
+}
+
+// BuscarMenuDiarioPorID devuelve un menú diario por su ID
+func (m *Memoria) BuscarMenuDiarioPorID(id int) (models.MenuDiario, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()	
+	for _, md := range m.menuDiarios {
+		if md.ID == id {
+			return md, true
+		}
+	}
+	return models.MenuDiario{}, false
+}
+
+// CrearMenuDiario crea un nuevo menú diario
+func (m *Memoria) CrearMenuDiario(menuDiario models.MenuDiario) models.MenuDiario {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	menuDiario.ID = m.nextMenuDiarioID
+	m.nextMenuDiarioID++
+	m.menuDiarios = append(m.menuDiarios, menuDiario)
+	return menuDiario
+}
+
+// ActualizarMenuDiario actualiza un menú diario por su ID
+func (m *Memoria) ActualizarMenuDiario(id int, menuDiario models.MenuDiario) (models.MenuDiario, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for i, md := range m.menuDiarios {
+		if md.ID == id {
+			menuDiario.ID = id
+			m.menuDiarios[i] = menuDiario
+			return menuDiario, true
+		}
+	}
+	return models.MenuDiario{}, false
+}
+
+// BorrarMenuDiario borra un menú diario por su ID
+func (m *Memoria) BorrarMenuDiario(id int) bool{
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for i, md := range m.menuDiarios {
+		if md.ID == id {
+			m.menuDiarios = append(m.menuDiarios[:i], m.menuDiarios[i+1:]...)
 			return true
 		}
 	}
