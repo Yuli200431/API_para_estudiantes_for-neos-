@@ -23,8 +23,9 @@ func main() {
 
 	//Transporte
 	memoriaTransporte := transporteStorage.NuevaMemoriaTransporte()
-	memoriaTransporte.SeedTransportes()
 
+	memoriaTransporte.SeedTransportes()
+	memoriaTransporte.SeedCooperativas()
 
 	// 2. Crear el Server inyectándole el almacenamiento.
 	servidor := handlers.NewServer(memoria)
@@ -68,6 +69,13 @@ func main() {
 		r.Get("/transporte/{id}", transporteServidor.ObtenerRutaPorID)
 		r.Put("/transporte/{id}", transporteServidor.ActualizarRuta)
 		r.Delete("/transporte/{id}", transporteServidor.EliminarRuta)
+
+		// Cooperativas de Transporte: CRUD completo.
+		r.Get("/cooperativa", transporteServidor.ListarCooperativas)
+		r.Post("/cooperativa", transporteServidor.AgregarCooperativa)
+		r.Get("/cooperativa/{id}", transporteServidor.ObtenerCooperativaPorID)
+		r.Put("/cooperativa/{id}", transporteServidor.ActualizarCooperativa)
+		r.Delete("/cooperativa/{id}", transporteServidor.EliminarCooperativa)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")

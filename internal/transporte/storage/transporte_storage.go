@@ -105,3 +105,76 @@ func (m *MemoriaTransporte) EliminarRuta(id uint) bool {
 	}
 	return false
 }
+
+//COOPERATIVA
+
+// SeedCooperativas agrega cooperativas de ejemplo a la memoria para pruebas iniciales
+func (m *MemoriaTransporte) SeedCooperativas() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.cooperativas = []models.Cooperativa{
+		{ID: 1, Nombre: "Cooperativa 1", Telefono: "123456789", Descripcion: "Dirección 1"},
+		{ID: 2, Nombre: "Cooperativa 2", Telefono: "987654321", Descripcion: "Dirección 2"},
+		{ID: 3, Nombre: "Cooperativa 3", Telefono: "456789123", Descripcion: "Dirección 3"},
+	}
+	m.nextCooperativaID = uint(4)
+}
+//Listar todas las cooperativas
+func (m *MemoriaTransporte) ListarCooperativas() []models.Cooperativa {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.Cooperativa, len(m.cooperativas))
+	copy(copia, m.cooperativas)
+	return copia
+}
+// Obtener una cooperativa por ID
+func (m *MemoriaTransporte) ObtenerCooperativaPorID(id uint) (models.Cooperativa, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, p := range m.cooperativas {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.Cooperativa{}, false
+}
+
+func (m *MemoriaTransporte) AgregarCooperativa(cooperativa models.Cooperativa) models.Cooperativa {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	cooperativa.ID = m.nextCooperativaID
+	m.nextCooperativaID++
+	m.cooperativas = append(m.cooperativas, cooperativa)
+	return cooperativa
+}
+
+func (m *MemoriaTransporte) ActualizarCooperativa(id uint, cooperativaActualizada models.Cooperativa) (models.Cooperativa, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.cooperativas {
+		if p.ID == id {
+			cooperativaActualizada.ID = id
+			m.cooperativas[i] = cooperativaActualizada
+			return cooperativaActualizada, true
+		}
+	}
+	return models.Cooperativa{}, false
+}
+
+func (m *MemoriaTransporte) EliminarCooperativa(id uint) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.cooperativas {
+		if p.ID == id {
+			m.cooperativas = append(m.cooperativas[:i], m.cooperativas[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
