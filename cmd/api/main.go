@@ -16,6 +16,8 @@ func main() {
 	memoria.SeedViviendas()
 	memoria.SeedFotos()
 	memoria.SeedSectores()
+	memoria.SeedAplicarViviendas()
+
 	// 2. Crear el Server inyectándole el almacenamiento.
 	servidor := handlers.NewServer(memoria)
 
