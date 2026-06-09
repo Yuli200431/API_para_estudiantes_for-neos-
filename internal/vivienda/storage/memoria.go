@@ -132,6 +132,8 @@ func (m *Memoria) SeedSectores() {
 		{SectorID: 2, Nombre: "La Epoca"},
 		{SectorID: 3, Nombre: "Los Electricos"},
 	}
+
+	m.nextSectorID = 4
 }
 
 // ListarSectores devuelve todas los sectores en memoria.
