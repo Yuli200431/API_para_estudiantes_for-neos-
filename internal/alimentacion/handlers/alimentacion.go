@@ -9,8 +9,8 @@ import (
      
 	"github.com/go-chi/chi/v5"
 
-	"API-Foraneos/internal/alimentacion/models"
-	"API-Foraneos/internal/alimentacion/storage"
+	"for-neos-api/internal/alimentacion/models"
+	"for-neos-api/internal/alimentacion/storage"
 )
 
 type Server struct {
@@ -19,12 +19,12 @@ type Server struct {
 
 func NewServer(storage *storage.Memoria) *Server {
 	return &Server{
-		storage: s,
+		storage: storage,
 	}
 }
 // ListarAlimentaciones maneja la solicitud GET /alimentaciones
 func (s *Server) ListarAlimentaciones(w http.ResponseWriter, _ *http.Request) {
-alimentaciones := s.storage.GetAllAlimentaciones()
+alimentaciones := s.storage.ListarAlimentaciones()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -33,15 +33,15 @@ alimentaciones := s.storage.GetAllAlimentaciones()
 	}
 }
 
-// ObtenerAlimentacion maneja la solicitud GET /alimentaciones/{id}
-func (s *Server) ObtenerAlimentacion(w http.ResponseWriter, r *http.Request) {
+// BuscarAlimentacionesPorID maneja la solicitud GET /alimentaciones/{id}
+func (s *Server) BuscarAlimentacionesPorID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
 
-	alimentacion, encontrado := s.storage.GetAlimentacionByID(id)
+	alimentacion, encontrado := s.storage.BuscarAlimentacionPorID(id)
 	if !encontrado {
 		http.Error(w, "Alimentación no encontrada", http.StatusNotFound)
 		return
@@ -66,7 +66,7 @@ func (s *Server) CrearAlimentacion(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "El nombre del local es obligatorio", http.StatusBadRequest)
 		return
 	}
-	creado := s.storage.CreateAlimentacion(nuevo)
+	creado := s.storage.CrearAlimentacion(nuevo)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(creado); err != nil {
@@ -94,7 +94,7 @@ func (s *Server) ActualizarAlimentacion(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "El ID en el cuerpo no coincide con el ID de la URL", http.StatusBadRequest)
 		return
 	}
-	actualizado, encontrado := s.storage.UpdateAlimentacion(id, datos)
+	actualizado, encontrado := s.storage.ActualizarAlimentacion(id, datos)
 	if !encontrado {
 		http.Error(w, "Alimentación no encontrada", http.StatusNotFound)
 		return
@@ -113,7 +113,7 @@ func (s *Server) BorrarAlimentacion(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
-	if !s.storage.DeleteAlimentacion(id) {
+	if !s.storage.BorrarAlimentacion(id) {
 		http.Error(w, "Alimentación no encontrada", http.StatusNotFound)
 		return
 	}

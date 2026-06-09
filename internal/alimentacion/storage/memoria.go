@@ -2,7 +2,7 @@ package storage
 
 import (
 	"sync"
-	"API-Foraneos/internal/alimentacion/models"
+	"for-neos-api/internal/alimentacion/models"
 )
 
 
