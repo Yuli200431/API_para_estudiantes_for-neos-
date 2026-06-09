@@ -91,7 +91,7 @@ func main() {
 		r.Get("/resenas", servidorAlimentacion.ListarResenas)
 		r.Get("/resenas/{id}", servidorAlimentacion.BuscarResenasPorID)
 		r.Post("/resenas", servidorAlimentacion.CrearResena)	
-		r.Put("/resenas/{id}", servidorAlimentacion.ActualizarResena)	
+	    r.Put("/resenas/{id}", servidorAlimentacion.ActualizarResena)	
 		r.Delete("/resenas/{id}", servidorAlimentacion.BorrarResena)		
 	
 	})
