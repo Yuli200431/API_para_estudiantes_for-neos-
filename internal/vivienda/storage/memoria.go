@@ -14,7 +14,8 @@ type Memoria struct {
 	fotos      []models.Foto
 	nextFotoID int
 
-	sectores []models.Sector
+	sectores     []models.Sector
+	nextSectorID int
 
 	aplicarviviendas       []models.AplicarVivienda
 	nextAplicarViviendasID int
@@ -31,7 +32,8 @@ func NuevaMemoria() *Memoria {
 		fotos:      []models.Foto{},
 		nextFotoID: 1,
 
-		sectores: []models.Sector{},
+		sectores:     []models.Sector{},
+		nextSectorID: 1,
 
 		aplicarviviendas:       []models.AplicarVivienda{},
 		nextAplicarViviendasID: 1,
@@ -48,9 +50,9 @@ func (m *Memoria) SeedViviendas() {
 	no := false
 
 	m.viviendas = []models.Vivienda{
-		{ViviendaID: 1, Titulo: "Casa Amarilla", TipoVivienda: "Casa", Precio: 120.0, Garantia: &si, Luz: &si, Agua: &si, Amueblado: &no, Internet: &si, BañoPrivado: &si, NumeroHabitaciones: 3, Mascotas: &no, GeneroPreferido: "Mixto", ReglasConvivencia: "No se permite fumar", Telefono: "123456789", Email: "casaamarilla@gmail.com", Estado: "Disponible", Comentario: "Excelente ubicación", SectorID: 1, ProveedorID: 1},
-		{ViviendaID: 2, Titulo: "Suite de Lujo", TipoVivienda: "Departamento", Precio: 200.0, Garantia: &si, Luz: &no, Agua: &si, Amueblado: &si, Internet: &si, BañoPrivado: &si, NumeroHabitaciones: 2, Mascotas: &no, GeneroPreferido: "Mixto", ReglasConvivencia: "No se permite fumar", Telefono: "123456789", Email: "suelujo@gmail.com", Estado: "Ocupado", Comentario: "Suite con vista panorámica", SectorID: 1, ProveedorID: 1},
-		{ViviendaID: 3, Titulo: "Departamento en el Centro", TipoVivienda: "Departamento", Precio: 150.0, Garantia: &no, Luz: &si, Agua: &si, Amueblado: &no, Internet: &si, BañoPrivado: &si, NumeroHabitaciones: 1, Mascotas: &no, GeneroPreferido: "Femenino", ReglasConvivencia: "No se permite fumar", Telefono: "123456789", Email: "departamentocentro@gmail.com", Estado: "Disponible", Comentario: "Departamento en el corazón de la ciudad", SectorID: 2, ProveedorID: 2},
+		{ViviendaID: 1, Titulo: "Casa Amarilla", TipoVivienda: "Casa", Precio: 120.0, Garantia: &si, Luz: &si, Agua: &si, Amueblado: &no, Internet: &si, BañoPrivado: &si, NumeroHabitaciones: 3, Mascotas: &no, GeneroPreferido: "Mixto", ReglasConvivencia: "No se permite fumar", Telefono: "123456789", Email: "casaamarilla@gmail.com", Estado: "Disponible", Comentario: "Excelente ubicación", SectorID: 1, Fotos: []models.Foto{{FotoID: 5, URL: "https://example.com/foto1.jpg", ViviendaID: 1}}, ProveedorID: 1},
+		{ViviendaID: 2, Titulo: "Suite de Lujo", TipoVivienda: "Departamento", Precio: 200.0, Garantia: &si, Luz: &no, Agua: &si, Amueblado: &si, Internet: &si, BañoPrivado: &si, NumeroHabitaciones: 2, Mascotas: &no, GeneroPreferido: "Mixto", ReglasConvivencia: "No se permite fumar", Telefono: "123456789", Email: "suelujo@gmail.com", Estado: "Ocupado", Comentario: "Suite con vista panorámica", SectorID: 1, Fotos: []models.Foto{{FotoID: 6, URL: "https://example.com/foto2.jpg", ViviendaID: 2}}, ProveedorID: 1},
+		{ViviendaID: 3, Titulo: "Departamento en el Centro", TipoVivienda: "Departamento", Precio: 150.0, Garantia: &no, Luz: &si, Agua: &si, Amueblado: &no, Internet: &si, BañoPrivado: &si, NumeroHabitaciones: 1, Mascotas: &no, GeneroPreferido: "Femenino", ReglasConvivencia: "No se permite fumar", Telefono: "123456789", Email: "departamentocentro@gmail.com", Estado: "Disponible", Comentario: "Departamento en el corazón de la ciudad", SectorID: 2, Fotos: []models.Foto{{FotoID: 7, URL: "https://example.com/foto3.jpg", ViviendaID: 3}}, ProveedorID: 2},
 	}
 	m.nextViviendaID = 4
 }
@@ -130,6 +132,69 @@ func (m *Memoria) SeedSectores() {
 		{SectorID: 2, Nombre: "La Epoca"},
 		{SectorID: 3, Nombre: "Los Electricos"},
 	}
+}
+
+// ListarSectores devuelve todas los sectores en memoria.
+func (m *Memoria) ListarSectores() []models.Sector {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.Sector, len(m.sectores))
+	copy(copia, m.sectores)
+	return copia
+}
+
+// BuscarSectorPorID devuelve el sector con el ID dado (patrón comma-ok).
+func (m *Memoria) BuscarSectorPorID(id int) (models.Sector, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, s := range m.sectores {
+		if s.SectorID == id {
+			return s, true
+		}
+	}
+	return models.Sector{}, false
+}
+
+// CrearSector agrega un Sector nuevo y devuelve el sector con ID asignado.
+func (m *Memoria) CrearSector(s models.Sector) models.Sector {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	s.SectorID = m.nextSectorID
+	m.nextSectorID++
+	m.sectores = append(m.sectores, s)
+	return s
+}
+
+// ActualizarSector reemplaza el Sector con el ID dado.
+func (m *Memoria) ActualizarSector(id int, datos models.Sector) (models.Sector, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, s := range m.sectores {
+		if s.SectorID == id {
+			datos.SectorID = id
+			m.sectores[i] = datos
+			return datos, true
+		}
+	}
+	return models.Sector{}, false
+}
+
+// BorrarSector elimina el sector con el ID dado.
+func (m *Memoria) BorrarSector(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, s := range m.sectores {
+		if s.SectorID == id {
+			m.sectores = append(m.sectores[:i], m.sectores[i+1:]...)
+			return true
+		}
+	}
+	return false
 }
 
 // FOTOS
