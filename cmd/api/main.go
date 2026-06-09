@@ -36,6 +36,13 @@ func main() {
 		r.Get("/fotos/{id}", servidor.ObtenerFoto)
 		r.Put("/fotos/{id}", servidor.ActualizarFoto)
 		r.Delete("/fotos/{id}", servidor.BorrarFoto)
+
+		//Sectores: CRUD completo.
+		r.Get("/sectores", servidor.ListarSectores)
+		r.Post("/sectores", servidor.CrearSector)
+		r.Get("/sectores/{id}", servidor.ObtenerSector)
+		r.Put("/sectores/{id}", servidor.ActualizarSector)
+		r.Delete("/sectores/{id}", servidor.BorrarSector)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
