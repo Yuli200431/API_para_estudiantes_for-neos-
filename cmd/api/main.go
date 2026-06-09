@@ -8,6 +8,9 @@ import (
 
 	"for-neos-api/internal/vivienda/handlers"
 	"for-neos-api/internal/vivienda/storage"
+
+	transporteHandlers "for-neos-api/internal/transporte/handlers"
+	transporteStorage "for-neos-api/internal/transporte/storage"
 )
 
 func main() {
@@ -18,8 +21,14 @@ func main() {
 	memoria.SeedSectores()
 	memoria.SeedAplicarViviendas()
 
+	//Transporte
+	memoriaTransporte := transporteStorage.NuevaMemoriaTransporte()
+	memoriaTransporte.SeedTransportes()
+
+
 	// 2. Crear el Server inyectándole el almacenamiento.
 	servidor := handlers.NewServer(memoria)
+	transporteServidor := transporteHandlers.NewServer(memoriaTransporte)
 
 	// 3. Configurar el router con versionado /api/v1/.
 	r := chi.NewRouter()
@@ -52,6 +61,13 @@ func main() {
 		r.Get("/aplicarviviendas/{id}", servidor.ObtenerAplicarVivienda)
 		r.Put("/aplicarviviendas/{id}", servidor.ActualizarAplicarVivienda)
 		r.Delete("/aplicarviviendas/{id}", servidor.BorrarAplicarVivienda)
+
+		// Rutas de Transporte: CRUD completo.
+		r.Get("/transporte", transporteServidor.ListarRutas)
+		r.Post("/transporte", transporteServidor.AgregarRuta)
+		r.Get("/transporte/{id}", transporteServidor.ObtenerRutaPorID)
+		r.Put("/transporte/{id}", transporteServidor.ActualizarRuta)
+		r.Delete("/transporte/{id}", transporteServidor.EliminarRuta)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")

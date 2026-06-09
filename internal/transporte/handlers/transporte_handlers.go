@@ -27,7 +27,11 @@ func NewServer(s *storage.MemoriaTransporte) *Server {
 func (s *Server) ListarRutas(w http.ResponseWriter, _ *http.Request) {
 	rutas := s.transporteStorage.ListarRutas()
 
-	ResponderJSON(w, http.StatusOK, rutas)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(rutas); err != nil {
+		log.Printf("Error codificando JSON: %v", err)
+	}
 }
 
 // Funcion para obtener una ruta por ID
@@ -36,18 +40,18 @@ func (s *Server) ListarRutas(w http.ResponseWriter, _ *http.Request) {
 func (s *Server) ObtenerRutaPorID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "ID inválido")
+		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
 
 	ruta, encontrado := s.transporteStorage.ObtenerRutaPorID(uint(id))
 	if !encontrado {
-		RespondError(w, http.StatusNotFound, "Ruta no encontrada")
+		http.Error(w, "Ruta no encontrada", http.StatusNotFound)
 		return
 	}
 
-	ResponderJSON(w, http.StatusOK, ruta)
-		w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(ruta); err != nil {
 		log.Printf("error codificando JSON: %v", err)
 	}
@@ -60,44 +64,49 @@ func (s *Server) ObtenerRutaPorID(w http.ResponseWriter, r *http.Request) {
 func (s *Server) AgregarRuta(w http.ResponseWriter, r *http.Request) {
 	var nuevaRuta models.RutaTransporte
 	if err := json.NewDecoder(r.Body).Decode(&nuevaRuta); err != nil {
-		RespondError(w, http.StatusBadRequest, "Datos de ruta inválidos"+err.Error())
+		http.Error(w, "Datos de ruta inválidos: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	if strings.TrimSpace(nuevaRuta.NombreLinea) == "" {
-		RespondError(w, http.StatusBadRequest, "El nombre de la línea es obligatorio")
+		http.Error(w, "El nombre de la línea es obligatorio", http.StatusBadRequest)
 		return
 	}
 	if strings.TrimSpace(nuevaRuta.FrecuenciaAprox) == "" {
-		RespondError(w, http.StatusBadRequest, "La frecuencia aproximada es obligatoria")
+		http.Error(w, "La frecuencia aproximada es obligatoria", http.StatusBadRequest)
 		return
 	}
 	if nuevaRuta.Precio <= 0 {
-		RespondError(w, http.StatusBadRequest, "El precio debe ser mayor a cero")
+		http.Error(w, "El precio debe ser mayor a cero", http.StatusBadRequest)
 		return
 	}
 	if strings.TrimSpace(nuevaRuta.DescripcionRuta) == "" {
-		RespondError(w, http.StatusBadRequest, "La descripción de la ruta es obligatoria")
+		http.Error(w, "La descripción de la ruta es obligatoria", http.StatusBadRequest)
 		return
 	}
 	if nuevaRuta.CooperativaID == 0 {
-		RespondError(w, http.StatusBadRequest, "El ID de la cooperativa es obligatorio")
+		http.Error(w, "El ID de la cooperativa es obligatorio", http.StatusBadRequest)
 		return
 	}
 	if nuevaRuta.SectorOrigenID == 0 {
-		RespondError(w, http.StatusBadRequest, "El ID del sector de origen es obligatorio")
+		http.Error(w, "El ID del sector de origen es obligatorio", http.StatusBadRequest)
 		return
 	}
 	if nuevaRuta.SectorDestinoID == 0 {
-		RespondError(w, http.StatusBadRequest, "El ID del sector de destino es obligatorio")
+		http.Error(w, "El ID del sector de destino es obligatorio", http.StatusBadRequest)
 		return
 	}
 	if nuevaRuta.ProviderID == 0 {
-		RespondError(w, http.StatusBadRequest, "El ID del proveedor es obligatorio")
+		http.Error(w, "El ID del proveedor es obligatorio", http.StatusBadRequest)
 		return
 	}
 	// Llamar al método AgregarRuta del almacenamiento
 	rutaCreada := s.transporteStorage.AgregarRuta(nuevaRuta)
-	ResponderJSON(w, http.StatusCreated, rutaCreada)
+
+		w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(rutaCreada); err != nil {
+		log.Printf("Error codificando JSON: %v", err)
+	}
 }
 
 // Funcion para actualizar una ruta
@@ -107,55 +116,60 @@ func (s *Server) AgregarRuta(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ActualizarRuta(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "ID inválido")
+		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
 
 	var rutaActualizada models.RutaTransporte
 	if err := json.NewDecoder(r.Body).Decode(&rutaActualizada); err != nil {
-		RespondError(w, http.StatusBadRequest, "Datos de ruta inválidos: "+err.Error())
+		http.Error(w, "Datos de ruta inválidos: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	if strings.TrimSpace(rutaActualizada.NombreLinea) == "" {
-		RespondError(w, http.StatusBadRequest, "El nombre de la línea es obligatorio")
+		http.Error(w, "El nombre de la línea es obligatorio", http.StatusBadRequest)
 		return
 	}
 	if strings.TrimSpace(rutaActualizada.FrecuenciaAprox) == "" {
-		RespondError(w, http.StatusBadRequest, "La frecuencia aproximada es obligatoria")
+		http.Error(w, "La frecuencia aproximada es obligatoria", http.StatusBadRequest)
 		return
 	}
 	if rutaActualizada.Precio <= 0 {
-		RespondError(w, http.StatusBadRequest, "El precio debe ser mayor a cero")
+		http.Error(w, "El precio debe ser mayor a cero", http.StatusBadRequest)
 		return
 	}
 	if strings.TrimSpace(rutaActualizada.DescripcionRuta) == "" {
-		RespondError(w, http.StatusBadRequest, "La descripción de la ruta es obligatoria")
+		http.Error(w, "La descripción de la ruta es obligatoria", http.StatusBadRequest)
 		return
 	}
 	if rutaActualizada.CooperativaID == 0 {
-		RespondError(w, http.StatusBadRequest, "El ID de la cooperativa es obligatorio")
+		http.Error(w, "El ID de la cooperativa es obligatorio", http.StatusBadRequest)
 		return
 	}
 	if rutaActualizada.SectorOrigenID == 0 {
-		RespondError(w, http.StatusBadRequest, "El ID del sector de origen es obligatorio")
+		http.Error(w, "El ID del sector de origen es obligatorio", http.StatusBadRequest)
 		return
 	}
 	if rutaActualizada.SectorDestinoID == 0 {
-		RespondError(w, http.StatusBadRequest, "El ID del sector de destino es obligatorio")
+		http.Error(w, "El ID del sector de destino es obligatorio", http.StatusBadRequest)
 		return
 	}
 	if rutaActualizada.ProviderID == 0 {
-		RespondError(w, http.StatusBadRequest, "El ID del proveedor es obligatorio")
+		http.Error(w, "El ID del proveedor es obligatorio", http.StatusBadRequest)
 		return
 	}
 
 	// Llamar al método ActualizarRuta del almacenamiento
-	ruta, actualizado := s.transporteStorage.ActualizarRuta(uint(id), rutaActualizada)
-	if !actualizado {
-		RespondError(w, http.StatusNotFound, "Ruta no encontrada")
+	actualizado, encontrado := s.transporteStorage.ActualizarRuta(uint(id), rutaActualizada)
+	if !encontrado {
+		http.Error(w, "Ruta no encontrada", http.StatusNotFound)
 		return
 	}
-	ResponderJSON(w, http.StatusOK, ruta)
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(actualizado); err != nil {
+		log.Printf("Error codificando JSON: %v", err)
+	}
 }
 
 // Funcion para eliminar una ruta
@@ -165,12 +179,12 @@ func (s *Server) ActualizarRuta(w http.ResponseWriter, r *http.Request) {
 func (s *Server) EliminarRuta(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "ID inválido")
+		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
 
 	if !s.transporteStorage.EliminarRuta(uint(id)) {
-		RespondError(w, http.StatusNotFound, "Ruta no encontrada")
+		http.Error(w, "Ruta no encontrada", http.StatusNotFound)
 		return
 	}
 	
