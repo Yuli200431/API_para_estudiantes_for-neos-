@@ -13,6 +13,9 @@ type Memoria struct{
 
 	menuDiarios []models.MenuDiario
 	nextMenuDiarioID int
+
+	platos []models.Plato
+	nextPlatoID int
     
 	mu sync.Mutex
 }
@@ -24,6 +27,9 @@ func NewMemoria() *Memoria {
 
 		menuDiarios: []models.MenuDiario{},
 		nextMenuDiarioID: 1,
+
+		platos: []models.Plato{},
+		nextPlatoID: 1,
 	
 	}
 } 
@@ -201,3 +207,99 @@ func (m *Memoria) BorrarMenuDiario(id int) bool{
 	}
 	return false
 }
+
+//metodos de platos
+
+// Seed de Platos
+func (m *Memoria) SeedPlatos() {
+	m.mu.Lock()
+	defer m.mu.Unlock()	
+	m.platos = []models.Plato{
+		{
+			ID:           1,
+			NombrePlato:  "Arroz con Pollo",
+			Descripcion:  "Arroz amarillo con pollo guisado",
+			Categoria:    "Plato Principal",
+			Precio:       2.50,
+			MenuDiarioID: 1,
+		},
+		{
+			ID:           2,
+			NombrePlato:  "Ensalada de Frutas",
+			Descripcion:  "Mezcla de frutas frescas",
+			Categoria:    "Postre",
+			Precio:       1.50,
+			MenuDiarioID: 1,
+		},
+		{
+			ID:           3,	
+			NombrePlato:  "Sopa de Menestra",
+			Descripcion:  "Sopa de lentejas con verduras",
+			Categoria:    "Entrada",
+			Precio:       1.00,	
+			MenuDiarioID: 2,
+		},
+	}
+	m.nextPlatoID = 4
+}
+
+// ListarPlatos devuelve todos los platos
+func (m *Memoria) ListarPlatos() []models.Plato {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	copia := make([]models.Plato, len(m.platos))
+	copy(copia, m.platos)
+	return copia
+}
+
+// BuscarPlatoPorID devuelve un plato por su ID
+func (m *Memoria) BuscarPlatoPorID(id int) (models.Plato, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, p := range m.platos {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.Plato{}, false
+}
+
+// CrearPlato crea un nuevo plato
+func (m *Memoria) CrearPlato(plato models.Plato) models.Plato {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	plato.ID = m.nextPlatoID
+	m.nextPlatoID++
+	m.platos = append(m.platos, plato)
+	return plato
+}
+
+// ActualizarPlato actualiza un plato por su ID
+func (m *Memoria) ActualizarPlato(id int, plato models.Plato) (models.Plato, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.platos {
+		if p.ID == id {
+			plato.ID = id
+			m.platos[i] = plato
+			return plato, true
+		}
+	}
+	return models.Plato{}, false
+}
+
+// BorrarPlato borra un plato por su ID
+func (m *Memoria) BorrarPlato(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.platos {
+		if p.ID == id {
+			m.platos = append(m.platos[:i], m.platos[i+1:]...)
+			return true
+		}
+	}
+	return false
+}				
