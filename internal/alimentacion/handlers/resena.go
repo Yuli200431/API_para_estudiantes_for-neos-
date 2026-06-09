@@ -7,7 +7,6 @@ import (
 	"log"
 
 	"for-neos-api/internal/alimentacion/models"
-	"for-neos-api/internal/alimentacion/storage"
 	"github.com/go-chi/chi/v5"
 	"encoding/json"
 )
@@ -64,6 +63,33 @@ func (s *Server) CrearResena(w http.ResponseWriter, r *http.Request) {
 
 	}	
 }		
+// ACTUALIZAR resena maneja la solicitud PUT/api/v /resenas/{id}	
+func (s *Server) ActualizarResena(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))	
+	if err != nil {	
+		http.Error(w, "ID inválido", http.StatusBadRequest)	
+		return	
+	}	
+	var datos models.Resena	
+	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {	
+		http.Error(w, "Datos inválidos: "+err.Error(), http.StatusBadRequest)	
+		return	
+	}
+	if strings.TrimSpace(datos.Comentario) == "" {	
+		http.Error(w, "El comentario es obligatorio", http.StatusBadRequest)	
+		return	
+		}	
+	actualizado, encontrado := s.storage.ActualizarResena(id, datos)	
+	if !encontrado {	
+		http.Error(w, "Resena no encontrada", http.StatusNotFound)	
+		return	
+		}	
+	w.Header().Set("Content-Type", "application/json")	
+	w.WriteHeader(http.StatusOK)	
+	if err := json.NewEncoder(w).Encode(actualizado); err != nil {	
+		log.Printf("Error al codificar la respuesta: %v", err)	
+	}	
+}
 // BorrarResena maneja la solicitud DELETE /resenas/{id}
 func (s *Server) BorrarResena(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))	

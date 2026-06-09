@@ -28,7 +28,8 @@ func main() {
 	memoriaAlimentacion.SeedAlimentaciones()
 	memoriaAlimentacion.SeedMenuDiarios()
 	memoriaAlimentacion.SeedPlatos()
-	
+	memoriaAlimentacion.SeedResenas()
+
 	servidorAlimentacion := handlersAlimentacion.NewServer(memoriaAlimentacion)
 
 	// --- ROUTER ---
@@ -86,6 +87,12 @@ func main() {
 		r.Put("/platos/{id}", servidorAlimentacion.ActualizarPlato)	
 		r.Delete("/platos/{id}", servidorAlimentacion.BorrarPlato)		
 
+		// Resenas: CRUD completo.
+		r.Get("/resenas", servidorAlimentacion.ListarResenas)
+		r.Get("/resenas/{id}", servidorAlimentacion.BuscarResenasPorID)
+		r.Post("/resenas", servidorAlimentacion.CrearResena)	
+		r.Put("/resenas/{id}", servidorAlimentacion.ActualizarResena)	
+		r.Delete("/resenas/{id}", servidorAlimentacion.BorrarResena)		
 	
 	})
 

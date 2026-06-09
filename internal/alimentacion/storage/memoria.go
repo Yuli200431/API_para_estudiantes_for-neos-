@@ -16,6 +16,9 @@ type Memoria struct{
 
 	platos []models.Plato
 	nextPlatoID int
+
+	resenas []models.Resena
+	nextResenaID int
     
 	mu sync.Mutex
 }
@@ -30,6 +33,9 @@ func NewMemoria() *Memoria {
 
 		platos: []models.Plato{},
 		nextPlatoID: 1,
+
+		resenas: []models.Resena{},
+		nextResenaID: 1,
 	
 	}
 } 
@@ -303,3 +309,95 @@ func (m *Memoria) BorrarPlato(id int) bool {
 	}
 	return false
 }				
+
+//metodos de resenas
+
+// Seed de Resenas
+func (m *Memoria) SeedResenas() {
+	m.mu.Lock()
+	defer m.mu.Unlock()	
+	m.resenas = []models.Resena{
+		{
+			ID:             1,
+			Comentario:     "Muy buena",
+			Calificacion:   5,
+			AlimentacionID: 1,
+		},
+		{
+			ID:             2,
+			Comentario:     "Buena",
+			Calificacion:   4,
+			AlimentacionID: 2,
+		},
+		{
+			ID:             3,
+			Comentario:     "Mala",
+			Calificacion:   3,
+			AlimentacionID: 3,
+		},
+	}
+	m.nextResenaID = 4
+}
+
+// ListarResenas devuelve todos los resenas
+func (m *Memoria) ListarResenas() []models.Resena {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	copia := make([]models.Resena, len(m.resenas))
+	copy(copia, m.resenas)
+	return copia
+}
+
+// BuscarResenaPorID devuelve un resena por su ID
+func (m *Memoria) BuscarResenaPorID(id int) (models.Resena, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, r := range m.resenas {
+		if r.ID == id {
+			return r, true
+		}
+	}			
+	return models.Resena{}, false
+	
+}
+
+// CrearResena crea un nuevo resena
+func (m *Memoria) CrearResena(resena models.Resena) models.Resena {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	resena.ID = m.nextResenaID
+	m.nextResenaID++
+	m.resenas = append(m.resenas, resena)
+	return resena
+}
+
+// ActualizarResena actualiza un resena por su ID
+func (m *Memoria) ActualizarResena(id int, resena models.Resena) (models.Resena, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, r := range m.resenas {
+		if r.ID == id {
+			resena.ID = id
+			m.resenas[i] = resena
+			return resena, true
+		}
+	}
+	return models.Resena{}, false
+}
+
+// BorrarResena borra un resena por su ID
+func (m *Memoria) BorrarResena(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, r := range m.resenas {
+		if r.ID == id {
+			m.resenas = append(m.resenas[:i], m.resenas[i+1:]...)
+			return true
+		}
+	}
+	return false
+	
+}	
