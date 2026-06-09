@@ -161,7 +161,19 @@ func (s *Server) ActualizarRuta(w http.ResponseWriter, r *http.Request) {
 // Funcion para eliminar una ruta
 // Recibe la peticion DELETE /rutas/:id y elimina la ruta correspondiente al ID proporcionado,
 // devolviendo un mensaje de éxito o error
+// Atiende DELETE /api/v1/transporte/{id}.
 func (s *Server) EliminarRuta(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "ID inválido")
+		return
+	}
 
+	if !s.transporteStorage.EliminarRuta(uint(id)) {
+		RespondError(w, http.StatusNotFound, "Ruta no encontrada")
+		return
+	}
+	
+	w.WriteHeader(http.StatusNoContent)
 }
 

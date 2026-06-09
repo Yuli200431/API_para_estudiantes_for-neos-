@@ -10,29 +10,30 @@ type MemoriaTransporte struct {
 	rutas  []models.RutaTransporte
 	nextID uint
 
-	cooperativas []models.Cooperativa
+	cooperativas      []models.Cooperativa
 	nextCooperativaID uint
 
-	sectores []models.Sector
+	sectores     []models.Sector
 	nextSectorID uint
 
-	mu     sync.Mutex
+	mu sync.Mutex
 }
 
 func NuevaMemoriaTransporte() *MemoriaTransporte {
 	return &MemoriaTransporte{
-		rutas:  []models.RutaTransporte{},
-		nextID: 1,
-		cooperativas: []models.Cooperativa{},
+		rutas:             []models.RutaTransporte{},
+		nextID:            1,
+		cooperativas:      []models.Cooperativa{},
 		nextCooperativaID: 1,
-		sectores: []models.Sector{},
-		nextSectorID: 1,
-		mu:     sync.Mutex{},
+		sectores:          []models.Sector{},
+		nextSectorID:      1,
+		mu:                sync.Mutex{},
 	}
 }
+
 //RUTAS DE TRANSPORTE
 
-//SeedTransportes agrega rutas de transporte de ejemplo a la memoria para pruebas iniciales
+// SeedTransportes agrega rutas de transporte de ejemplo a la memoria para pruebas iniciales
 func (m *MemoriaTransporte) SeedTransportes() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -90,4 +91,17 @@ func (m *MemoriaTransporte) ActualizarRuta(id uint, rutaActualizada models.RutaT
 		}
 	}
 	return models.RutaTransporte{}, false
+}
+
+func (m *MemoriaTransporte) EliminarRuta(id uint) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.rutas {
+		if p.ID == id {
+			m.rutas = append(m.rutas[:i], m.rutas[i+1:]...)
+			return true
+		}
+	}
+	return false
 }
