@@ -27,6 +27,7 @@ func main() {
 	memoriaAlimentacion := storageAlimentacion.NewMemoria()
 	memoriaAlimentacion.SeedAlimentaciones()
 	memoriaAlimentacion.SeedMenuDiarios()
+	memoriaAlimentacion.SeedPlatos()
 	
 	servidorAlimentacion := handlersAlimentacion.NewServer(memoriaAlimentacion)
 
@@ -76,7 +77,14 @@ func main() {
 		r.Get("/menudiarios/{id}", servidorAlimentacion.BuscarMenuDiarioPorID)
 		r.Post("/menudiarios", servidorAlimentacion.CrearMenuDiario)
 		r.Put("/menudiarios/{id}", servidorAlimentacion.ActualizarMenuDiario)
-		r.Delete("/menudiarios/{id}", servidorAlimentacion.BorrarMenuDiario)		
+		r.Delete("/menudiarios/{id}", servidorAlimentacion.BorrarMenuDiario)	
+		
+		// Platos: CRUD completo.
+		r.Get("/platos", servidorAlimentacion.ListarPlatos)
+		r.Get("/platos/{id}", servidorAlimentacion.BuscarPlatosPorID)
+		r.Post("/platos", servidorAlimentacion.CrearPlato)
+		r.Put("/platos/{id}", servidorAlimentacion.ActualizarPlato)	
+		r.Delete("/platos/{id}", servidorAlimentacion.BorrarPlato)		
 
 	
 	})
