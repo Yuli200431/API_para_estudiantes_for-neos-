@@ -43,6 +43,13 @@ func main() {
 		r.Get("/sectores/{id}", servidor.ObtenerSector)
 		r.Put("/sectores/{id}", servidor.ActualizarSector)
 		r.Delete("/sectores/{id}", servidor.BorrarSector)
+
+		// AplicarViviendas: CRUD completo.
+		r.Get("/aplicarviviendas", servidor.ListarAplicarViviendas)
+		r.Post("/aplicarviviendas", servidor.CrearAplicarVivienda)
+		r.Get("/aplicarviviendas/{id}", servidor.ObtenerAplicarVivienda)
+		r.Put("/aplicarviviendas/{id}", servidor.ActualizarAplicarVivienda)
+		r.Delete("/aplicarviviendas/{id}", servidor.BorrarAplicarVivienda)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
