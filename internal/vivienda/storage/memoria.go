@@ -17,8 +17,8 @@ type Memoria struct {
 	sectores     []models.Sector
 	nextSectorID int
 
-	aplicarviviendas       []models.AplicarVivienda
-	nextAplicarViviendasID int
+	aplicarviviendas      []models.AplicarVivienda
+	nextAplicarViviendaID int
 
 	mu sync.Mutex
 }
@@ -35,8 +35,8 @@ func NuevaMemoria() *Memoria {
 		sectores:     []models.Sector{},
 		nextSectorID: 1,
 
-		aplicarviviendas:       []models.AplicarVivienda{},
-		nextAplicarViviendasID: 1,
+		aplicarviviendas:      []models.AplicarVivienda{},
+		nextAplicarViviendaID: 1,
 	}
 }
 
@@ -268,6 +268,82 @@ func (m *Memoria) BorrarFoto(id int) bool {
 	for i, f := range m.fotos {
 		if f.FotoID == id {
 			m.fotos = append(m.fotos[:i], m.fotos[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
+// APLICAR VIVIENDAS
+// SeedAplicarViviendas carga AplicarViviendas iniciales que coinciden con ViviendaID de las viviendas pre-cargadas.
+func (m *Memoria) SeedAplicarViviendas() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.aplicarviviendas = []models.AplicarVivienda{
+		{AplicarViviendaID: 1, EstudianteID: 1, ViviendaID: 1, Estado: "Pendiente"},
+		{AplicarViviendaID: 2, EstudianteID: 2, ViviendaID: 2, Estado: "Aceptada"},
+		{AplicarViviendaID: 3, EstudianteID: 3, ViviendaID: 3, Estado: "Rechazada"},
+	}
+	m.nextAplicarViviendaID = 4
+}
+
+// ListarAplicarViviendas devuelve todas las AplicarViviendas en memoria.
+func (m *Memoria) ListarAplicarViviendas() []models.AplicarVivienda {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.AplicarVivienda, len(m.aplicarviviendas))
+	copy(copia, m.aplicarviviendas)
+	return copia
+}
+
+// BuscarAplicarViviendasPorID devuelve la AplicarVivienda con el ID dado (patrón comma-ok).
+func (m *Memoria) BuscarAplicarViviendasPorID(id int) (models.AplicarVivienda, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, a := range m.aplicarviviendas {
+		if a.AplicarViviendaID == id {
+			return a, true
+		}
+	}
+	return models.AplicarVivienda{}, false
+}
+
+// CrearAplicarVivienda agrega un AplicarVivienda nueva y devuelve la AplicarVivienda con ID asignado.
+func (m *Memoria) CrearAplicarVivienda(a models.AplicarVivienda) models.AplicarVivienda {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	a.AplicarViviendaID = m.nextAplicarViviendaID
+	m.nextAplicarViviendaID++
+	m.aplicarviviendas = append(m.aplicarviviendas, a)
+	return a
+}
+
+// ActualizarAplicarVivienda reemplaza la AplicarVivienda con el ID dado.
+func (m *Memoria) ActualizarAplicarVivienda(id int, datos models.AplicarVivienda) (models.AplicarVivienda, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, a := range m.aplicarviviendas {
+		if a.AplicarViviendaID == id {
+			datos.AplicarViviendaID = id
+			m.aplicarviviendas[i] = datos
+			return datos, true
+		}
+	}
+	return models.AplicarVivienda{}, false
+}
+
+// BorrarAplicarVivienda elimina la AplicarVivienda con el ID dado.
+func (m *Memoria) BorrarAplicarVivienda(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, a := range m.aplicarviviendas {
+		if a.AplicarViviendaID == id {
+			m.aplicarviviendas = append(m.aplicarviviendas[:i], m.aplicarviviendas[i+1:]...)
 			return true
 		}
 	}
