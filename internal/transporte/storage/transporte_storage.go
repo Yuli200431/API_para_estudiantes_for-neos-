@@ -13,9 +13,6 @@ type MemoriaTransporte struct {
 	cooperativas      []models.Cooperativa
 	nextCooperativaID uint
 
-	sectores     []models.Sector
-	nextSectorID uint
-
 	mu sync.Mutex
 }
 
@@ -25,8 +22,7 @@ func NuevaMemoriaTransporte() *MemoriaTransporte {
 		nextID:            1,
 		cooperativas:      []models.Cooperativa{},
 		nextCooperativaID: 1,
-		sectores:          []models.Sector{},
-		nextSectorID:      1,
+
 		mu:                sync.Mutex{},
 	}
 }
