@@ -36,9 +36,9 @@ func (m *MemoriaTransporte) SeedTransportes() {
 
 	m.rutas = []models.RutaTransporte{
 		{ID: 1, NombreLinea: "Línea 1", CooperativaID: 1, SectorOrigenID: 1, SectorDestinoID: 2, FrecuenciaAprox: "Cada 10 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Santa Martha con La Epoca pasando por los Electricos", ProviderID: 1},
-		{ID: 2, NombreLinea: "Línea 2", CooperativaID: 2, SectorOrigenID: 2, SectorDestinoID: 3, FrecuenciaAprox: "Cada 15 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta La Epoca con los Electricos pasando por el Sector 4", ProviderID: 2},
-		{ID: 3, NombreLinea: "Línea 3", CooperativaID: 3, SectorOrigenID: 1, SectorDestinoID: 4, FrecuenciaAprox: "Cada 12 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta el Santa Martha con el Sector 4 pasando por el Sector 5", ProviderID: 3},
-		{ID: 4, NombreLinea: "Línea 4", CooperativaID: 4, SectorOrigenID: 3, SectorDestinoID: 4, FrecuenciaAprox: "Cada 20 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Los Electricos con el Sector 4 pasando por el Sector 6", ProviderID: 4},
+		{ID: 2, NombreLinea: "Línea 2", CooperativaID: 2, SectorOrigenID: 2, SectorDestinoID: 3, FrecuenciaAprox: "Cada 15 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta La Epoca con los Electricos pasando por Tarqui", ProviderID: 2},
+		{ID: 3, NombreLinea: "Línea 3", CooperativaID: 3, SectorOrigenID: 1, SectorDestinoID: 4, FrecuenciaAprox: "Cada 12 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta el Santa Martha con Tarqui pasando por el Mercado Central", ProviderID: 3},
+		{ID: 4, NombreLinea: "Línea 4", CooperativaID: 4, SectorOrigenID: 3, SectorDestinoID: 4, FrecuenciaAprox: "Cada 20 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Los Electricos con Tarqui pasando por Santa Martha", ProviderID: 4},
 	}
 	m.nextID = uint(5)
 }
