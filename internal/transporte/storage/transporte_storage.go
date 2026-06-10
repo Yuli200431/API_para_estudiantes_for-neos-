@@ -39,11 +39,12 @@ func (m *MemoriaTransporte) SeedTransportes() {
 	defer m.mu.Unlock()
 
 	m.rutas = []models.RutaTransporte{
-		{ID: 1, NombreLinea: "Línea 1", CooperativaID: 1, SectorOrigenID: 1, SectorDestinoID: 2, FrecuenciaAprox: "Cada 10 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta el Sector 1 con el Sector 2 pasando por el Sector 3", ProviderID: 1},
-		{ID: 2, NombreLinea: "Línea 2", CooperativaID: 2, SectorOrigenID: 2, SectorDestinoID: 3, FrecuenciaAprox: "Cada 15 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta el Sector 2 con el Sector 3 pasando por el Sector 4", ProviderID: 2},
-		{ID: 3, NombreLinea: "Línea 3", CooperativaID: 3, SectorOrigenID: 1, SectorDestinoID: 4, FrecuenciaAprox: "Cada 12 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta el Sector 1 con el Sector 4 pasando por el Sector 5", ProviderID: 3},
+		{ID: 1, NombreLinea: "Línea 1", CooperativaID: 1, SectorOrigenID: 1, SectorDestinoID: 2, FrecuenciaAprox: "Cada 10 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Santa Martha con La Epoca pasando por los Electricos", ProviderID: 1},
+		{ID: 2, NombreLinea: "Línea 2", CooperativaID: 2, SectorOrigenID: 2, SectorDestinoID: 3, FrecuenciaAprox: "Cada 15 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta La Epoca con los Electricos pasando por el Sector 4", ProviderID: 2},
+		{ID: 3, NombreLinea: "Línea 3", CooperativaID: 3, SectorOrigenID: 1, SectorDestinoID: 4, FrecuenciaAprox: "Cada 12 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta el Santa Martha con el Sector 4 pasando por el Sector 5", ProviderID: 3},
+		{ID: 4, NombreLinea: "Línea 4", CooperativaID: 4, SectorOrigenID: 3, SectorDestinoID: 4, FrecuenciaAprox: "Cada 20 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Los Electricos con el Sector 4 pasando por el Sector 6", ProviderID: 4},
 	}
-	m.nextID = uint(4)
+	m.nextID = uint(5)
 }
 
 // Listar todas las rutas
@@ -114,13 +115,15 @@ func (m *MemoriaTransporte) SeedCooperativas() {
 	defer m.mu.Unlock()
 
 	m.cooperativas = []models.Cooperativa{
-		{ID: 1, Nombre: "Cooperativa 1", Telefono: "123456789", Descripcion: "Dirección 1"},
-		{ID: 2, Nombre: "Cooperativa 2", Telefono: "987654321", Descripcion: "Dirección 2"},
-		{ID: 3, Nombre: "Cooperativa 3", Telefono: "456789123", Descripcion: "Dirección 3"},
+		{ID: 1, Nombre: "Cooperativa Ciudad de Manta", Telefono: "0987654321", Descripcion: "Servicio de transporte urbano que conecta sectores residenciales con el centro de la ciudad."},
+		{ID: 2, Nombre: "Cooperativa Costa Azul", Telefono: "0991234567", Descripcion: "Opera rutas entre universidades, terminal terrestre y zonas comerciales."},
+		{ID: 3, Nombre: "Cooperativa Costa Azul", Telefono: "0984567890", Descripcion: "Brinda servicio de transporte público hacia barrios periféricos y zonas de expansión urbana."},
+		{ID: 4, Nombre: "Cooperativa Los Esteros", Telefono: "0977764321", Descripcion: "Ofrece rutas hacia zonas turísticas y áreas de recreación en la costa."},
 	}
-	m.nextCooperativaID = uint(4)
+	m.nextCooperativaID = uint(5)
 }
-//Listar todas las cooperativas
+
+// Listar todas las cooperativas
 func (m *MemoriaTransporte) ListarCooperativas() []models.Cooperativa {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -129,6 +132,7 @@ func (m *MemoriaTransporte) ListarCooperativas() []models.Cooperativa {
 	copy(copia, m.cooperativas)
 	return copia
 }
+
 // Obtener una cooperativa por ID
 func (m *MemoriaTransporte) ObtenerCooperativaPorID(id uint) (models.Cooperativa, bool) {
 	m.mu.Lock()
