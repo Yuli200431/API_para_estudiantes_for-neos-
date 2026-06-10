@@ -1,0 +1,180 @@
+package storage
+
+import (
+	"sync"
+
+	"for-neos-api/internal/transporte/models"
+)
+
+type MemoriaTransporte struct {
+	rutas  []models.RutaTransporte
+	nextID uint
+
+	cooperativas      []models.Cooperativa
+	nextCooperativaID uint
+
+	mu sync.Mutex
+}
+
+func NuevaMemoriaTransporte() *MemoriaTransporte {
+	return &MemoriaTransporte{
+		rutas:             []models.RutaTransporte{},
+		nextID:            1,
+		cooperativas:      []models.Cooperativa{},
+		nextCooperativaID: 1,
+
+		mu:                sync.Mutex{},
+	}
+}
+
+//RUTAS DE TRANSPORTE
+
+// SeedTransportes agrega rutas de transporte de ejemplo a la memoria para pruebas iniciales
+func (m *MemoriaTransporte) SeedTransportes() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.rutas = []models.RutaTransporte{
+		{ID: 1, NombreLinea: "Línea 1", CooperativaID: 1, SectorOrigenID: 1, SectorDestinoID: 2, FrecuenciaAprox: "Cada 10 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Santa Martha con La Epoca pasando por los Electricos", ProviderID: 1},
+		{ID: 2, NombreLinea: "Línea 2", CooperativaID: 2, SectorOrigenID: 2, SectorDestinoID: 3, FrecuenciaAprox: "Cada 15 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta La Epoca con los Electricos pasando por Tarqui", ProviderID: 2},
+		{ID: 3, NombreLinea: "Línea 3", CooperativaID: 3, SectorOrigenID: 1, SectorDestinoID: 4, FrecuenciaAprox: "Cada 12 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta el Santa Martha con Tarqui pasando por el Mercado Central", ProviderID: 3},
+		{ID: 4, NombreLinea: "Línea 4", CooperativaID: 4, SectorOrigenID: 3, SectorDestinoID: 4, FrecuenciaAprox: "Cada 20 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Los Electricos con Tarqui pasando por Santa Martha", ProviderID: 4},
+	}
+	m.nextID = uint(5)
+}
+
+// Listar todas las rutas
+func (m *MemoriaTransporte) ListarRutas() []models.RutaTransporte {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.RutaTransporte, len(m.rutas))
+	copy(copia, m.rutas)
+	return copia
+}
+
+// Obtener una ruta por ID
+func (m *MemoriaTransporte) ObtenerRutaPorID(id uint) (models.RutaTransporte, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, p := range m.rutas {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.RutaTransporte{}, false
+}
+
+func (m *MemoriaTransporte) AgregarRuta(ruta models.RutaTransporte) models.RutaTransporte {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	ruta.ID = m.nextID
+	m.nextID++
+	m.rutas = append(m.rutas, ruta)
+	return ruta
+}
+
+func (m *MemoriaTransporte) ActualizarRuta(id uint, rutaActualizada models.RutaTransporte) (models.RutaTransporte, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.rutas {
+		if p.ID == id {
+			rutaActualizada.ID = id
+			m.rutas[i] = rutaActualizada
+			return rutaActualizada, true
+		}
+	}
+	return models.RutaTransporte{}, false
+}
+
+func (m *MemoriaTransporte) EliminarRuta(id uint) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.rutas {
+		if p.ID == id {
+			m.rutas = append(m.rutas[:i], m.rutas[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
+//COOPERATIVA
+
+// SeedCooperativas agrega cooperativas de ejemplo a la memoria para pruebas iniciales
+func (m *MemoriaTransporte) SeedCooperativas() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.cooperativas = []models.Cooperativa{
+		{ID: 1, Nombre: "Cooperativa Ciudad de Manta", Telefono: "0987654321", Descripcion: "Servicio de transporte urbano que conecta sectores residenciales con el centro de la ciudad."},
+		{ID: 2, Nombre: "Cooperativa Costa Azul", Telefono: "0991234567", Descripcion: "Opera rutas entre universidades, terminal terrestre y zonas comerciales."},
+		{ID: 3, Nombre: "Cooperativa Costa Azul", Telefono: "0984567890", Descripcion: "Brinda servicio de transporte público hacia barrios periféricos y zonas de expansión urbana."},
+		{ID: 4, Nombre: "Cooperativa Los Esteros", Telefono: "0977764321", Descripcion: "Ofrece rutas hacia zonas turísticas y áreas de recreación en la costa."},
+	}
+	m.nextCooperativaID = uint(5)
+}
+
+// Listar todas las cooperativas
+func (m *MemoriaTransporte) ListarCooperativas() []models.Cooperativa {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.Cooperativa, len(m.cooperativas))
+	copy(copia, m.cooperativas)
+	return copia
+}
+
+// Obtener una cooperativa por ID
+func (m *MemoriaTransporte) ObtenerCooperativaPorID(id uint) (models.Cooperativa, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, p := range m.cooperativas {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.Cooperativa{}, false
+}
+
+func (m *MemoriaTransporte) AgregarCooperativa(cooperativa models.Cooperativa) models.Cooperativa {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	cooperativa.ID = m.nextCooperativaID
+	m.nextCooperativaID++
+	m.cooperativas = append(m.cooperativas, cooperativa)
+	return cooperativa
+}
+
+func (m *MemoriaTransporte) ActualizarCooperativa(id uint, cooperativaActualizada models.Cooperativa) (models.Cooperativa, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.cooperativas {
+		if p.ID == id {
+			cooperativaActualizada.ID = id
+			m.cooperativas[i] = cooperativaActualizada
+			return cooperativaActualizada, true
+		}
+	}
+	return models.Cooperativa{}, false
+}
+
+func (m *MemoriaTransporte) EliminarCooperativa(id uint) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.cooperativas {
+		if p.ID == id {
+			m.cooperativas = append(m.cooperativas[:i], m.cooperativas[i+1:]...)
+			return true
+		}
+	}
+	return false
+}

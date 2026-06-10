@@ -5,13 +5,17 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	
-	 "for-neos-api/internal/vivienda/handlers"
+
+	"for-neos-api/internal/vivienda/handlers"
 	"for-neos-api/internal/vivienda/storage"
+
+	transporteHandlers "for-neos-api/internal/transporte/handlers"
+	transporteStorage "for-neos-api/internal/transporte/storage"
 
 	handlersAlimentacion "for-neos-api/internal/alimentacion/handlers"
 	storageAlimentacion "for-neos-api/internal/alimentacion/storage"
 )
+
 func main() {
 	memoria := storage.NuevaMemoria()
 
@@ -20,10 +24,17 @@ func main() {
 	memoria.SeedSectores()
 	memoria.SeedAplicarViviendas()
 
+	//Transporte
+	memoriaTransporte := transporteStorage.NuevaMemoriaTransporte()
+
+	memoriaTransporte.SeedTransportes()
+	memoriaTransporte.SeedCooperativas()
+
 	// 2. Crear el Server inyectándole el almacenamiento.
 	servidor := handlers.NewServer(memoria)
+	transporteServidor := transporteHandlers.NewServer(memoriaTransporte)
 
-    //Alimentacion
+	//Alimentacion
 	memoriaAlimentacion := storageAlimentacion.NewMemoria()
 
 	memoriaAlimentacion.SeedAlimentaciones()
@@ -32,7 +43,6 @@ func main() {
 	memoriaAlimentacion.SeedResenas()
 
 	servidorAlimentacion := handlersAlimentacion.NewServer(memoriaAlimentacion)
-
 
 	// 3. Configurar el router con versionado /api/v1/.
 	r := chi.NewRouter()
@@ -91,8 +101,23 @@ func main() {
 		r.Get("/resenas", servidorAlimentacion.ListarResenas)
 		r.Post("/resenas", servidorAlimentacion.CrearResena)
 		r.Get("/resenas/{id}", servidorAlimentacion.BuscarResenasPorID)
-		r.Put("/resenas/{id}", servidorAlimentacion.ActualizarResena)	
+		r.Put("/resenas/{id}", servidorAlimentacion.ActualizarResena)
 		r.Delete("/resenas/{id}", servidorAlimentacion.BorrarResena)
+
+		// Rutas de Transporte: CRUD completo.
+		r.Get("/transporte", transporteServidor.ListarRutas)
+		r.Post("/transporte", transporteServidor.AgregarRuta)
+		r.Get("/transporte/{id}", transporteServidor.ObtenerRutaPorID)
+		r.Put("/transporte/{id}", transporteServidor.ActualizarRuta)
+		r.Delete("/transporte/{id}", transporteServidor.EliminarRuta)
+
+		// Cooperativas de Transporte: CRUD completo.
+		r.Get("/cooperativa", transporteServidor.ListarCooperativas)
+		r.Post("/cooperativa", transporteServidor.AgregarCooperativa)
+		r.Get("/cooperativa/{id}", transporteServidor.ObtenerCooperativaPorID)
+		r.Put("/cooperativa/{id}", transporteServidor.ActualizarCooperativa)
+		r.Delete("/cooperativa/{id}", transporteServidor.EliminarCooperativa)
+
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
