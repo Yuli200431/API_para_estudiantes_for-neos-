@@ -11,6 +11,9 @@ import (
 
 	transporteHandlers "for-neos-api/internal/transporte/handlers"
 	transporteStorage "for-neos-api/internal/transporte/storage"
+
+	handlersAlimentacion "for-neos-api/internal/alimentacion/handlers"
+	storageAlimentacion "for-neos-api/internal/alimentacion/storage"
 )
 
 func main() {
@@ -30,6 +33,16 @@ func main() {
 	// 2. Crear el Server inyectándole el almacenamiento.
 	servidor := handlers.NewServer(memoria)
 	transporteServidor := transporteHandlers.NewServer(memoriaTransporte)
+
+	//Alimentacion
+	memoriaAlimentacion := storageAlimentacion.NewMemoria()
+
+	memoriaAlimentacion.SeedAlimentaciones()
+	memoriaAlimentacion.SeedMenuDiarios()
+	memoriaAlimentacion.SeedPlatos()
+	memoriaAlimentacion.SeedResenas()
+
+	servidorAlimentacion := handlersAlimentacion.NewServer(memoriaAlimentacion)
 
 	// 3. Configurar el router con versionado /api/v1/.
 	r := chi.NewRouter()
@@ -63,6 +76,34 @@ func main() {
 		r.Put("/aplicarviviendas/{id}", servidor.ActualizarAplicarVivienda)
 		r.Delete("/aplicarviviendas/{id}", servidor.BorrarAplicarVivienda)
 
+		// Alimentacion: CRUD completo.
+		r.Get("/alimentaciones", servidorAlimentacion.ListarAlimentaciones)
+		r.Post("/alimentaciones", servidorAlimentacion.CrearAlimentacion)
+		r.Get("/alimentaciones/{id}", servidorAlimentacion.BuscarAlimentacionesPorID)
+		r.Put("/alimentaciones/{id}", servidorAlimentacion.ActualizarAlimentacion)
+		r.Delete("/alimentaciones/{id}", servidorAlimentacion.BorrarAlimentacion)
+
+		// MenuDiarios: CRUD completo.
+		r.Get("/menudiarios", servidorAlimentacion.ListarMenuDiarios)
+		r.Post("/menudiarios", servidorAlimentacion.CrearMenuDiario)
+		r.Get("/menudiarios/{id}", servidorAlimentacion.BuscarMenuDiarioPorID)
+		r.Put("/menudiarios/{id}", servidorAlimentacion.ActualizarMenuDiario)
+		r.Delete("/menudiarios/{id}", servidorAlimentacion.BorrarMenuDiario)
+
+		// Platos: CRUD completo.
+		r.Get("/platos", servidorAlimentacion.ListarPlatos)
+		r.Post("/platos", servidorAlimentacion.CrearPlato)
+		r.Get("/platos/{id}", servidorAlimentacion.BuscarPlatosPorID)
+		r.Put("/platos/{id}", servidorAlimentacion.ActualizarPlato)
+		r.Delete("/platos/{id}", servidorAlimentacion.BorrarPlato)
+
+		// Resenas: CRUD completo.
+		r.Get("/resenas", servidorAlimentacion.ListarResenas)
+		r.Post("/resenas", servidorAlimentacion.CrearResena)
+		r.Get("/resenas/{id}", servidorAlimentacion.BuscarResenasPorID)
+		r.Put("/resenas/{id}", servidorAlimentacion.ActualizarResena)
+		r.Delete("/resenas/{id}", servidorAlimentacion.BorrarResena)
+
 		// Rutas de Transporte: CRUD completo.
 		r.Get("/transporte", transporteServidor.ListarRutas)
 		r.Post("/transporte", transporteServidor.AgregarRuta)
@@ -76,8 +117,10 @@ func main() {
 		r.Get("/cooperativa/{id}", transporteServidor.ObtenerCooperativaPorID)
 		r.Put("/cooperativa/{id}", transporteServidor.ActualizarCooperativa)
 		r.Delete("/cooperativa/{id}", transporteServidor.EliminarCooperativa)
+
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
+
 }
