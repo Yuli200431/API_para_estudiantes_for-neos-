@@ -6,23 +6,33 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"for-neos-api/internal/vivienda/handlers"
-	"for-neos-api/internal/vivienda/storage"
+	viviendaHandlers "for-neos-api/internal/vivienda/handlers"
+	viviendaStorage "for-neos-api/internal/vivienda/storage"
 
 	transporteHandlers "for-neos-api/internal/transporte/handlers"
 	transporteStorage "for-neos-api/internal/transporte/storage"
 
 	handlersAlimentacion "for-neos-api/internal/alimentacion/handlers"
 	storageAlimentacion "for-neos-api/internal/alimentacion/storage"
+
+	usuarioHandlers "for-neos-api/internal/usuario/handlers"
+
+	usuarioService "for-neos-api/internal/usuario/service"
+
+	"for-neos-api/internal/storage"
 )
 
 func main() {
-	memoria := storage.NuevaMemoria()
+	usuarioRepo := storage.NewUsuarioStorage()
+	auth := usuarioService.NuevoAuthService(usuarioRepo)
+	authServer := usuarioHandlers.NewServer(auth)
 
-	memoria.SeedViviendas()
-	memoria.SeedFotos()
-	memoria.SeedSectores()
-	memoria.SeedAplicarViviendas()
+	memoriaVivienda := viviendaStorage.NuevaMemoria()
+
+	memoriaVivienda.SeedViviendas()
+	memoriaVivienda.SeedFotos()
+	memoriaVivienda.SeedSectores()
+	memoriaVivienda.SeedAplicarViviendas()
 
 	//Transporte
 	memoriaTransporte := transporteStorage.NuevaMemoriaTransporte()
@@ -31,7 +41,7 @@ func main() {
 	memoriaTransporte.SeedCooperativas()
 
 	// 2. Crear el Server inyectándole el almacenamiento.
-	servidor := handlers.NewServer(memoria)
+	servidor := viviendaHandlers.NewServer(memoriaVivienda)
 	transporteServidor := transporteHandlers.NewServer(memoriaTransporte)
 
 	//Alimentacion
@@ -48,6 +58,9 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Route("/api/v1", func(r chi.Router) {
+		r.Post("/auth/registrar", authServer.Registrar)
+		r.Post("/auth/login", authServer.Login)
+
 		// Viviendas: CRUD completo.
 		r.Get("/viviendas", servidor.ListarViviendas)
 		r.Post("/viviendas", servidor.CrearVivienda)

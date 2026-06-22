@@ -23,10 +23,10 @@ type Claims struct {
 }
 
 type AuthService struct {
-	repo storage.UsuarioStorage
+	repo *storage.UsuarioStorage
 }
 
-func NuevoAuthService(repo storage.UsuarioStorage) *AuthService {
+func NuevoAuthService(repo *storage.UsuarioStorage) *AuthService {
 	return &AuthService{repo: repo}
 
 }
