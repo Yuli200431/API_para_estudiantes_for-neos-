@@ -39,6 +39,7 @@ func main() {
 
 	memoriaTransporte.SeedTransportes()
 	memoriaTransporte.SeedCooperativas()
+	memoriaTransporte.SeedParadas()
 
 	// 2. Crear el Server inyectándole el almacenamiento.
 	servidor := viviendaHandlers.NewServer(memoriaVivienda)
@@ -130,6 +131,13 @@ func main() {
 		r.Get("/cooperativa/{id}", transporteServidor.ObtenerCooperativaPorID)
 		r.Put("/cooperativa/{id}", transporteServidor.ActualizarCooperativa)
 		r.Delete("/cooperativa/{id}", transporteServidor.EliminarCooperativa)
+
+		//Paradas de Bus: CRUD completo
+		r.Get("/paradas", transporteServidor.ListarParadas)
+		r.Post("/paradas", transporteServidor.AgregarParada)
+		r.Get("/paradas/{id}", transporteServidor.ObtenerParadaPorID)
+		r.Put("/paradas/{id}", transporteServidor.ActualizarParada)
+		r.Delete("/paradas/{id}", transporteServidor.EliminarParada)
 
 	})
 
