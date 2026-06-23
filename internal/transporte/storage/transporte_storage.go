@@ -13,6 +13,9 @@ type MemoriaTransporte struct {
 	cooperativas      []models.Cooperativa
 	nextCooperativaID uint
 
+	paradas []models.ParadaBus
+	nextParadaID uint
+
 	mu sync.Mutex
 }
 
@@ -22,6 +25,8 @@ func NuevaMemoriaTransporte() *MemoriaTransporte {
 		nextID:            1,
 		cooperativas:      []models.Cooperativa{},
 		nextCooperativaID: 1,
+		paradas: []models.ParadaBus{},
+		nextParadaID: 1,
 
 		mu:                sync.Mutex{},
 	}
@@ -35,10 +40,10 @@ func (m *MemoriaTransporte) SeedTransportes() {
 	defer m.mu.Unlock()
 
 	m.rutas = []models.RutaTransporte{
-		{ID: 1, NombreLinea: "Línea 1", CooperativaID: 1, SectorOrigenID: 1, SectorDestinoID: 2, FrecuenciaAprox: "Cada 10 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Santa Martha con La Epoca pasando por los Electricos", ProviderID: 1},
-		{ID: 2, NombreLinea: "Línea 2", CooperativaID: 2, SectorOrigenID: 2, SectorDestinoID: 3, FrecuenciaAprox: "Cada 15 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta La Epoca con los Electricos pasando por Tarqui", ProviderID: 2},
-		{ID: 3, NombreLinea: "Línea 3", CooperativaID: 3, SectorOrigenID: 1, SectorDestinoID: 4, FrecuenciaAprox: "Cada 12 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta el Santa Martha con Tarqui pasando por el Mercado Central", ProviderID: 3},
-		{ID: 4, NombreLinea: "Línea 4", CooperativaID: 4, SectorOrigenID: 3, SectorDestinoID: 4, FrecuenciaAprox: "Cada 20 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Los Electricos con Tarqui pasando por Santa Martha", ProviderID: 4},
+		{ID: 1, NombreLinea: "Línea 1", CooperativaID: 1, SectorOrigenID: 1, SectorDestinoID: 2, FrecuenciaAprox: "Cada 10 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Santa Martha con La Epoca pasando por los Electricos", ParadaBusID: 1},
+		{ID: 2, NombreLinea: "Línea 2", CooperativaID: 2, SectorOrigenID: 2, SectorDestinoID: 3, FrecuenciaAprox: "Cada 15 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta La Epoca con los Electricos pasando por Tarqui", ParadaBusID: 2},
+		{ID: 3, NombreLinea: "Línea 3", CooperativaID: 3, SectorOrigenID: 1, SectorDestinoID: 4, FrecuenciaAprox: "Cada 12 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta el Santa Martha con Tarqui pasando por el Mercado Central", ParadaBusID: 3},
+		{ID: 4, NombreLinea: "Línea 4", CooperativaID: 4, SectorOrigenID: 3, SectorDestinoID: 4, FrecuenciaAprox: "Cada 20 minutos", Precio: 0.40, DescripcionRuta: "Ruta que conecta Los Electricos con Tarqui pasando por Santa Martha", ParadaBusID: 4},
 	}
 	m.nextID = uint(5)
 }
@@ -173,6 +178,80 @@ func (m *MemoriaTransporte) EliminarCooperativa(id uint) bool {
 	for i, p := range m.cooperativas {
 		if p.ID == id {
 			m.cooperativas = append(m.cooperativas[:i], m.cooperativas[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
+//PARADA DE BUS
+func (m *MemoriaTransporte) SeedParadas() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.paradas = []models.ParadaBus{
+		{ID: 1, NombreParada: "Terminal Terrestre", Direccion: "Av. 4 de Noviembre", Descripcion: "Parada principal de transporte urbano"},
+		{ID: 2, NombreParada: "ULEAM", Direccion: "Ciudadela Universitaria", Descripcion: "Entrada principal de la universidad"},
+		{ID: 3, NombreParada: "Mall del Pacífico", Direccion: "Vía Barbasquillo", Descripcion: "Parada cercana al centro comercial"},
+	}
+
+	m.nextParadaID = 4
+}
+
+// Listar todas las paradas bus
+func (m *MemoriaTransporte) ListarParadas() []models.ParadaBus {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.ParadaBus, len(m.paradas))
+	copy(copia, m.paradas)
+	return copia
+}
+
+// Obtener una cooperativa por ID
+func (m *MemoriaTransporte) ObtenerParadaPorID(id uint) (models.ParadaBus, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, p := range m.paradas {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.ParadaBus{}, false
+}
+
+func (m *MemoriaTransporte) AgregarParada(parada models.ParadaBus) models.ParadaBus {
+    m.mu.Lock()
+    defer m.mu.Unlock()
+
+    parada.ID = m.nextParadaID   
+    m.nextParadaID++             
+    m.paradas = append(m.paradas, parada)
+    return parada
+}
+
+func (m *MemoriaTransporte) ActualizarParada(id uint, paradabusActualizada models.ParadaBus) (models.ParadaBus, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.paradas {
+		if p.ID == id {
+			paradabusActualizada.ID = id
+			m.paradas[i] = paradabusActualizada
+			return paradabusActualizada, true
+		}
+	}
+	return models.ParadaBus{}, false
+}
+
+func (m *MemoriaTransporte) EliminarParada(id uint) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.paradas {
+		if p.ID == id {
+			m.paradas = append(m.paradas[:i], m.paradas[i+1:]...)
 			return true
 		}
 	}

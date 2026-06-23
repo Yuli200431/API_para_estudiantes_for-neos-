@@ -95,14 +95,14 @@ func (s *Server) AgregarRuta(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "El ID del sector de destino es obligatorio", http.StatusBadRequest)
 		return
 	}
-	if nuevaRuta.ProviderID == 0 {
+	if nuevaRuta.ParadaBusID == 0 {
 		http.Error(w, "El ID del proveedor es obligatorio", http.StatusBadRequest)
 		return
 	}
 	// Llamar al método AgregarRuta del almacenamiento
 	rutaCreada := s.transporteStorage.AgregarRuta(nuevaRuta)
 
-		w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(rutaCreada); err != nil {
 		log.Printf("Error codificando JSON: %v", err)
@@ -153,7 +153,7 @@ func (s *Server) ActualizarRuta(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "El ID del sector de destino es obligatorio", http.StatusBadRequest)
 		return
 	}
-	if rutaActualizada.ProviderID == 0 {
+	if rutaActualizada.ParadaBusID == 0 {
 		http.Error(w, "El ID del proveedor es obligatorio", http.StatusBadRequest)
 		return
 	}
@@ -164,7 +164,7 @@ func (s *Server) ActualizarRuta(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ruta no encontrada", http.StatusNotFound)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(actualizado); err != nil {
@@ -187,7 +187,6 @@ func (s *Server) EliminarRuta(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ruta no encontrada", http.StatusNotFound)
 		return
 	}
-	
+
 	w.WriteHeader(http.StatusNoContent)
 }
-

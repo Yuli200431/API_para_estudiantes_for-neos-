@@ -12,5 +12,5 @@ type RutaTransporte struct {
 	SectorOrigenID  uint `json:"sector_origen_id"`
 	SectorDestinoID uint `json:"sector_destino_id"`
 
-	ProviderID uint `json:"provider_id"`
+	ParadaBusID uint `json:"parada_bus_id"`
 }
