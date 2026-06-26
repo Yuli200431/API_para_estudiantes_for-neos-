@@ -3,6 +3,7 @@ package storage
 import (
 	"for-neos-api/internal/vivienda/models"
 	transporteModels "for-neos-api/internal/transporte/models"
+	alimentacionModels "for-neos-api/internal/alimentacion/models"
 )
 
 type ViviendaRepository interface {
@@ -68,6 +69,40 @@ type RutaTransporteRepository interface {
 	AgregarRuta(r transporteModels.RutaTransporte) transporteModels.RutaTransporte
 	ActualizarRuta(id uint, r transporteModels.RutaTransporte) (transporteModels.RutaTransporte, bool)
 	EliminarRuta(id uint) bool
+}
+
+//Alimentacion
+
+type AlimentacionRepository interface {
+	ListarAlimentaciones() []alimentacionModels.Alimentacion
+	BuscarAlimentacionPorID(id int) (alimentacionModels.Alimentacion, bool)
+	CrearAlimentacion(a alimentacionModels.Alimentacion) alimentacionModels.Alimentacion
+	ActualizarAlimentacion(id int, a alimentacionModels.Alimentacion) (alimentacionModels.Alimentacion, bool)
+	BorrarAlimentacion(id int) bool
+}
+
+type MenuDiarioRepository interface {
+	ListarMenuDiarios() []alimentacionModels.MenuDiario
+	BuscarMenuDiarioPorID(id int) (alimentacionModels.MenuDiario, bool)
+	CrearMenuDiario(m alimentacionModels.MenuDiario) alimentacionModels.MenuDiario
+	ActualizarMenuDiario(id int, m alimentacionModels.MenuDiario) (alimentacionModels.MenuDiario, bool)
+	BorrarMenuDiario(id int) bool
+}
+
+type PlatoRepository interface {
+	ListarPlatos() []alimentacionModels.Plato
+	BuscarPlatoPorID(id int) (alimentacionModels.Plato, bool)
+	CrearPlato(p alimentacionModels.Plato) alimentacionModels.Plato
+	ActualizarPlato(id int, p alimentacionModels.Plato) (alimentacionModels.Plato, bool)
+	BorrarPlato(id int) bool
+}
+
+type ResenaRepository interface {
+	ListarResenas() []alimentacionModels.Resena
+	BuscarResenaPorID(id int) (alimentacionModels.Resena, bool)
+	CrearResena(r alimentacionModels.Resena) alimentacionModels.Resena
+	ActualizarResena(id int, r alimentacionModels.Resena) (alimentacionModels.Resena, bool)
+	BorrarResena(id int) bool
 }
 
 //var _ Almacen = (*AlmacenStorage)(nil) NO ELIMINAR SE UTILIZARA MAS ADELANTE
