@@ -2,6 +2,7 @@ package storage
 
 import (
 	"for-neos-api/internal/vivienda/models"
+	transporteModels "for-neos-api/internal/transporte/models"
 )
 
 type ViviendaRepository interface {
@@ -41,6 +42,32 @@ type Almacen interface {
 	FotoRepository
 	AplicarViviendaRepository
 	SectorRepository
+}
+
+//Trnasporte
+
+type CooperativaRepository interface {
+	ListarCooperativas() []transporteModels.Cooperativa
+	ObtenerCooperativaPorID(id uint) (transporteModels.Cooperativa, bool)
+	AgregarCooperativa(c transporteModels.Cooperativa) transporteModels.Cooperativa
+	ActualizarCooperativa(id uint, c transporteModels.Cooperativa) (transporteModels.Cooperativa, bool)
+	EliminarCooperativa(id uint) bool
+}
+
+type ParadaBusRepository interface {
+	ListarParadas() []transporteModels.ParadaBus
+	ObtenerParadaPorID(id uint) (transporteModels.ParadaBus, bool)
+	AgregarParada(p transporteModels.ParadaBus) transporteModels.ParadaBus
+	ActualizarParada(id uint, p transporteModels.ParadaBus) (transporteModels.ParadaBus, bool)
+	EliminarParada(id uint) bool
+}
+
+type RutaTransporteRepository interface {
+	ListarRutas() []transporteModels.RutaTransporte
+	ObtenerRutaPorID(id uint) (transporteModels.RutaTransporte, bool)
+	AgregarRuta(r transporteModels.RutaTransporte) transporteModels.RutaTransporte
+	ActualizarRuta(id uint, r transporteModels.RutaTransporte) (transporteModels.RutaTransporte, bool)
+	EliminarRuta(id uint) bool
 }
 
 //var _ Almacen = (*AlmacenStorage)(nil) NO ELIMINAR SE UTILIZARA MAS ADELANTE

@@ -2,10 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -17,13 +15,8 @@ import (
 // Recibe la peticion GET /paradas y devuelve un JSON con todas las paradas disponibles
 // Atiende GET /api/v1/paradas
 func (s *Server) ListarParadas(w http.ResponseWriter, _ *http.Request) {
-	rutas := s.transporteStorage.ListarParadas()
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(rutas); err != nil {
-		log.Printf("Error codificando JSON: %v", err)
-	}
+	paradas := s.Paradas.ListarParadas()
+	RespondJSON(w, http.StatusOK, paradas)
 }
 
 // Funcion para obtener una paradas por ID
@@ -32,21 +25,17 @@ func (s *Server) ListarParadas(w http.ResponseWriter, _ *http.Request) {
 func (s *Server) ObtenerParadaPorID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "ID inválido", http.StatusBadRequest)
+		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return
 	}
 
-	parada, encontrado := s.transporteStorage.ObtenerParadaPorID(uint(id))
-	if !encontrado {
-		http.Error(w, "Parada no encontrada", http.StatusNotFound)
+	paradas, err := s.Paradas.ObtenerParadas(id)
+	if err != nil {
+		RespondError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(parada); err != nil {
-		log.Printf("error codificando JSON: %v", err)
-	}
+	RespondJSON(w, http.StatusOK, paradas)
 }
 
 // Funcion para crear una nueva parada
@@ -56,29 +45,16 @@ func (s *Server) ObtenerParadaPorID(w http.ResponseWriter, r *http.Request) {
 func (s *Server) AgregarParada(w http.ResponseWriter, r *http.Request) {
 	var nuevaParada models.ParadaBus
 	if err := json.NewDecoder(r.Body).Decode(&nuevaParada); err != nil {
-		http.Error(w, "Datos de parada inválidos: "+err.Error(), http.StatusBadRequest)
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
 		return
 	}
-	if strings.TrimSpace(nuevaParada.NombreParada) == "" {
-		http.Error(w, "El nombre de la parada de bus es obligatorio", http.StatusBadRequest)
-		return
-	}
-		if strings.TrimSpace(nuevaParada.Direccion) == "" {
-		http.Error(w, "La direccion de la parada es obligatoria", http.StatusBadRequest)
-		return
-	}
-	if strings.TrimSpace(nuevaParada.Descripcion) == "" {
-		http.Error(w, "La descripción de la parada es obligatoria", http.StatusBadRequest)
-		return
-	}
-	// Llamar al método AgregarParada del almacenamiento
-	paradaCreada := s.transporteStorage.AgregarParada(nuevaParada)
 
-		w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(paradaCreada); err != nil {
-		log.Printf("Error codificando JSON: %v", err)
+	paradaCreada, err := s.Paradas.CrearParada(nuevaParada)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, err.Error())
+		return
 	}
+	RespondJSON(w, http.StatusCreated, paradaCreada)
 }
 
 // Funcion para actualizar una parada
@@ -88,40 +64,23 @@ func (s *Server) AgregarParada(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ActualizarParada(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "ID inválido", http.StatusBadRequest)
+		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return
 	}
 
-	var paradaActualizada models.ParadaBus
-	if err := json.NewDecoder(r.Body).Decode(&paradaActualizada); err != nil {
-		http.Error(w, "Datos de parada inválidos: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-	if strings.TrimSpace(paradaActualizada.NombreParada) == "" {
-		http.Error(w, "El nombre de la parada es obligatorio", http.StatusBadRequest)
-		return
-	}
-		if strings.TrimSpace(paradaActualizada.Direccion) == "" {
-		http.Error(w, "La direccion de la parada es obligatoria", http.StatusBadRequest)
-		return
-	}
-	if strings.TrimSpace(paradaActualizada.Descripcion) == "" {
-		http.Error(w, "La descripción de la parada es obligatoria", http.StatusBadRequest)
+	var datos models.ParadaBus
+	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
 		return
 	}
 
-	// Llamar al método ActualizarParada del almacenamiento
-	actualizado, encontrado := s.transporteStorage.ActualizarParada(uint(id), paradaActualizada)
-	if !encontrado {
-		http.Error(w, "Ruta no encontrada", http.StatusNotFound)
+	actualizada, err := s.Paradas.ActualizarParadas(id, datos)
+	if err != nil {
+		RespondError(w, http.StatusNotFound, err.Error())
 		return
 	}
-	
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(actualizado); err != nil {
-		log.Printf("Error codificando JSON: %v", err)
-	}
+
+	RespondJSON(w, http.StatusOK, actualizada)
 }
 
 // Funcion para eliminar una parada
@@ -135,10 +94,9 @@ func (s *Server) EliminarParada(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.transporteStorage.EliminarParada(uint(id)) {
-		http.Error(w, "Ruta no encontrada", http.StatusNotFound)
+	if err := s.Paradas.BorrarParadas(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-	
-	w.WriteHeader(http.StatusNoContent)
+	RespondJSON(w, http.StatusOK, nil)
 }
