@@ -1,105 +1,74 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
-	"strings"
-	"log"
 
 	"for-neos-api/internal/alimentacion/models"
 	"github.com/go-chi/chi/v5"
-	"encoding/json"
 )
 
-// ListarResenas maneja la solicitud GET /resenas
 func (s *Server) ListarResenas(w http.ResponseWriter, _ *http.Request) {
-	resenas := s.storage.ListarResenas()
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(resenas); err != nil {
-		log.Printf("Error al codificar la respuesta: %v", err)
-	}
+	RespondJSON(w, http.StatusOK, s.Resena.Listar())
 }
 
-// BuscarResenasPorID maneja la solicitud GET /resenas/{id}
 func (s *Server) BuscarResenasPorID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "ID inválido", http.StatusBadRequest)
+		RespondError(w, http.StatusBadRequest, "ID inválido")
 		return
 	}
-
-	resena, encontrado := s.storage.BuscarResenaPorID(id)
-	if !encontrado {
-		http.Error(w, "Resena no encontrada", http.StatusNotFound)
+	resena, err := s.Resena.Obtener(id)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(resena); err != nil {
-		log.Printf("Error al codificar la respuesta: %v", err)
-	}
+	RespondJSON(w, http.StatusOK, resena)
 }
-
-//CrearResena maneja la solicitud POST/api/c /resenas	
 
 func (s *Server) CrearResena(w http.ResponseWriter, r *http.Request) {
 	var nuevo models.Resena
 	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
-		http.Error(w, "Datos inválidos: "+err.Error(), http.StatusBadRequest)	
-		return
-	}	
-	if strings.TrimSpace(nuevo.Comentario) == "" {
-		http.Error(w, "El comentario es obligatorio", http.StatusBadRequest)	
+		RespondError(w, http.StatusBadRequest, "Datos inválidos: "+err.Error())
 		return
 	}
-	creado := s.storage.CrearResena(nuevo)
-	w.Header().Set("Content-Type", "application/json")	
-	w.WriteHeader(http.StatusCreated)	
-	if err := json.NewEncoder(w).Encode(creado); err != nil {	
-		log.Printf("Error al codificar la respuesta: %v", err)	
-
-	}	
-}		
-// ACTUALIZAR resena maneja la solicitud PUT/api/v /resenas/{id}	
-func (s *Server) ActualizarResena(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))	
-	if err != nil {	
-		http.Error(w, "ID inválido", http.StatusBadRequest)	
-		return	
-	}	
-	var datos models.Resena	
-	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {	
-		http.Error(w, "Datos inválidos: "+err.Error(), http.StatusBadRequest)	
-		return	
+	creado, err := s.Resena.Crear(nuevo)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
+		return
 	}
-	if strings.TrimSpace(datos.Comentario) == "" {	
-		http.Error(w, "El comentario es obligatorio", http.StatusBadRequest)	
-		return	
-		}	
-	actualizado, encontrado := s.storage.ActualizarResena(id, datos)	
-	if !encontrado {	
-		http.Error(w, "Resena no encontrada", http.StatusNotFound)	
-		return	
-		}	
-	w.Header().Set("Content-Type", "application/json")	
-	w.WriteHeader(http.StatusOK)	
-	if err := json.NewEncoder(w).Encode(actualizado); err != nil {	
-		log.Printf("Error al codificar la respuesta: %v", err)	
-	}	
+	RespondJSON(w, http.StatusCreated, creado)
 }
-// BorrarResena maneja la solicitud DELETE /resenas/{id}
+
+func (s *Server) ActualizarResena(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "ID inválido")
+		return
+	}
+	var datos models.Resena
+	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
+		RespondError(w, http.StatusBadRequest, "Datos inválidos: "+err.Error())
+		return
+	}
+	actualizado, err := s.Resena.Actualizar(id, datos)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
+		return
+	}
+	RespondJSON(w, http.StatusOK, actualizado)
+}
+
 func (s *Server) BorrarResena(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))	
-	if err != nil {	
-		http.Error(w, "ID inválido", http.StatusBadRequest)	
-		return	
-		}	
-	if !s.storage.BorrarResena(id) {	
-		http.Error(w, "Resena no encontrada", http.StatusNotFound)	
-		return	
-		}	
-	w.WriteHeader(http.StatusNoContent)	
-}		
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "ID inválido")
+		return
+	}
+	if err := s.Resena.Borrar(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
+		return
+	}
+	RespondJSON(w, http.StatusNoContent, nil)
+}
