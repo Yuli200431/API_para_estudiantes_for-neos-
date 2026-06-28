@@ -23,17 +23,21 @@ type Claims struct {
 }
 
 type AuthService struct {
-	repo *storage.UsuarioStorage
+	repo storage.UserRepository
 }
 
-func NuevoAuthService(repo *storage.UsuarioStorage) *AuthService {
+func NuevoAuthService(repo storage.UserRepository) *AuthService {
 	return &AuthService{repo: repo}
 
 }
-func (s *AuthService) Registrar(email, password string) (models.Usuario, error) {
+func (s *AuthService) Registrar(nombre, email, password string) (models.Usuario, error) {
+	nombre = strings.TrimSpace(nombre)
 	email = strings.TrimSpace(strings.ToLower(email))
-	if email == "" || strings.TrimSpace(password) == "" {
+	if nombre == "" || strings.TrimSpace(password) == "" {
 		return models.Usuario{}, ErrNombreVacio
+	}
+	if email == "" || strings.TrimSpace(password) == "" {
+		return models.Usuario{}, ErrEmailVacio
 	}
 	if _, existe := s.repo.BuscarUsuarioPorEmail(email); existe {
 		return models.Usuario{}, ErrEmailEnUso
@@ -45,6 +49,7 @@ func (s *AuthService) Registrar(email, password string) (models.Usuario, error) 
 	//Si todo funciona bien va a retornar el usuario Creado
 	return s.repo.CrearUsuario(
 		models.Usuario{
+			Nombre:       nombre,
 			Email:        email,
 			PasswordHash: string(hash),
 		})
@@ -92,7 +97,7 @@ func (s *AuthService) ValidarToken(tokenStr string) (int, error) {
 		}
 		return secretoJWT, nil
 	})
-	if err != nil || token.Valid {
+	if err != nil || !token.Valid {
 		return 0, ErrCredencialesInvalidas
 	}
 	claims, ok := token.Claims.(*Claims)

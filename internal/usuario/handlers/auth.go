@@ -6,6 +6,7 @@ import (
 )
 
 type Credenciales struct {
+	Nombre   string `json:"nombre"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -21,6 +22,7 @@ func (s *Server) Registrar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	usuario, err := s.Auth.Registrar(
+		creds.Nombre,
 		creds.Email,
 		creds.Password,
 	)

@@ -10,8 +10,8 @@ type ParadaBusService struct {
 	repo storage.ParadaBusRepository
 }
 
-func NuevaParadaBusService(repo storage.ParadaBusRepository) *ParadaBusService{
-	return &ParadaBusService{repo:repo}
+func NuevaParadaBusService(repo storage.ParadaBusRepository) *ParadaBusService {
+	return &ParadaBusService{repo: repo}
 }
 
 func (s *ParadaBusService) ListarParadas() []models.ParadaBus {
@@ -19,7 +19,7 @@ func (s *ParadaBusService) ListarParadas() []models.ParadaBus {
 }
 
 func (s *ParadaBusService) ObtenerParadas(id int) (models.ParadaBus, error) {
-	a, ok := s.repo.ObtenerParadaPorID(uint(id))
+	a, ok := s.repo.BuscarParadaPorID(uint(id))
 	if !ok {
 		return models.ParadaBus{}, ErrNoEncontrado
 	}
@@ -30,7 +30,7 @@ func (s *ParadaBusService) CrearParada(a models.ParadaBus) (models.ParadaBus, er
 	if err := validacionParadaBus(a); err != nil {
 		return models.ParadaBus{}, err
 	}
-	return s.repo.AgregarParada(a), nil
+	return s.repo.CrearParada(a), nil
 }
 
 func (s *ParadaBusService) ActualizarParadas(id int, a models.ParadaBus) (models.ParadaBus, error) {
@@ -45,7 +45,7 @@ func (s *ParadaBusService) ActualizarParadas(id int, a models.ParadaBus) (models
 }
 
 func (s *ParadaBusService) BorrarParadas(id int) error {
-	if !s.repo.EliminarParada(uint(id)) {
+	if !s.repo.BorrarParada(uint(id)) {
 		return ErrNoEncontrado
 	}
 	return nil

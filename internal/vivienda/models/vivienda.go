@@ -1,8 +1,8 @@
 package models
 
 type Vivienda struct {
-	ViviendaID         int     `json:"vivienda_id"`
-	Titulo             string  `json:"titulo"`
+	ViviendaID         int     `gorm:"primaryKey" json:"vivienda_id"`
+	Titulo             string  `json:"titulo" gorm:"not null"`
 	TipoVivienda       string  `json:"tipo_vivienda"`
 	Precio             float64 `json:"precio"`
 	Garantia           *bool   `json:"garantia"`
@@ -23,6 +23,6 @@ type Vivienda struct {
 	Comentario         string  `json:"comentario"`
 
 	SectorID    int    `json:"sector_id"`
-	Fotos       []Foto `json:"fotos"`
+	Fotos       []Foto `gorm:"foreignKey:ViviendaID;references:ViviendaID" json:"fotos"`
 	ProveedorID int    `json:"proveedor_id"`
 }

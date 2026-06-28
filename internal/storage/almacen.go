@@ -1,9 +1,10 @@
 package storage
 
 import (
-	"for-neos-api/internal/vivienda/models"
-	transporteModels "for-neos-api/internal/transporte/models"
 	alimentacionModels "for-neos-api/internal/alimentacion/models"
+	transporteModels "for-neos-api/internal/transporte/models"
+	usersModels "for-neos-api/internal/usuario/models"
+	"for-neos-api/internal/vivienda/models"
 )
 
 type ViviendaRepository interface {
@@ -38,37 +39,30 @@ type SectorRepository interface {
 	BorrarSector(id int) bool
 }
 
-type Almacen interface {
-	ViviendaRepository
-	FotoRepository
-	AplicarViviendaRepository
-	SectorRepository
-}
-
-//Trnasporte
+//Transporte
 
 type CooperativaRepository interface {
 	ListarCooperativas() []transporteModels.Cooperativa
-	ObtenerCooperativaPorID(id uint) (transporteModels.Cooperativa, bool)
-	AgregarCooperativa(c transporteModels.Cooperativa) transporteModels.Cooperativa
+	BuscarCooperativaPorID(id uint) (transporteModels.Cooperativa, bool)
+	CrearCooperativa(c transporteModels.Cooperativa) transporteModels.Cooperativa
 	ActualizarCooperativa(id uint, c transporteModels.Cooperativa) (transporteModels.Cooperativa, bool)
-	EliminarCooperativa(id uint) bool
+	BorrarCooperativa(id uint) bool
 }
 
 type ParadaBusRepository interface {
 	ListarParadas() []transporteModels.ParadaBus
-	ObtenerParadaPorID(id uint) (transporteModels.ParadaBus, bool)
-	AgregarParada(p transporteModels.ParadaBus) transporteModels.ParadaBus
+	BuscarParadaPorID(id uint) (transporteModels.ParadaBus, bool)
+	CrearParada(p transporteModels.ParadaBus) transporteModels.ParadaBus
 	ActualizarParada(id uint, p transporteModels.ParadaBus) (transporteModels.ParadaBus, bool)
-	EliminarParada(id uint) bool
+	BorrarParada(id uint) bool
 }
 
 type RutaTransporteRepository interface {
 	ListarRutas() []transporteModels.RutaTransporte
-	ObtenerRutaPorID(id uint) (transporteModels.RutaTransporte, bool)
-	AgregarRuta(r transporteModels.RutaTransporte) transporteModels.RutaTransporte
+	BuscarRutaPorID(id uint) (transporteModels.RutaTransporte, bool)
+	CrearRuta(r transporteModels.RutaTransporte) transporteModels.RutaTransporte
 	ActualizarRuta(id uint, r transporteModels.RutaTransporte) (transporteModels.RutaTransporte, bool)
-	EliminarRuta(id uint) bool
+	BorrarRuta(id uint) bool
 }
 
 //Alimentacion
@@ -105,4 +99,23 @@ type ResenaRepository interface {
 	BorrarResena(id int) bool
 }
 
-//var _ Almacen = (*AlmacenStorage)(nil) NO ELIMINAR SE UTILIZARA MAS ADELANTE
+type UserRepository interface {
+	CrearUsuario(u usersModels.Usuario) (usersModels.Usuario, error)
+	BuscarUsuarioPorEmail(email string) (usersModels.Usuario, bool)
+}
+
+type Almacen interface {
+	ViviendaRepository
+	FotoRepository
+	AplicarViviendaRepository
+	SectorRepository
+	AlimentacionRepository
+	MenuDiarioRepository
+	PlatoRepository
+	ResenaRepository
+	CooperativaRepository
+	RutaTransporteRepository
+	ParadaBusRepository
+}
+
+var _ Almacen = (*AlmacenSQLC)(nil)

@@ -10,8 +10,8 @@ type CooperativaService struct {
 	repo storage.CooperativaRepository
 }
 
-func NuevaCooperaticaService(repo storage.CooperativaRepository) *CooperativaService{
-	return &CooperativaService{repo:repo}
+func NuevaCooperaticaService(repo storage.CooperativaRepository) *CooperativaService {
+	return &CooperativaService{repo: repo}
 }
 
 func (s *CooperativaService) Listar() []models.Cooperativa {
@@ -19,7 +19,7 @@ func (s *CooperativaService) Listar() []models.Cooperativa {
 }
 
 func (s *CooperativaService) Obtener(id int) (models.Cooperativa, error) {
-	a, ok := s.repo.ObtenerCooperativaPorID(uint(id))
+	a, ok := s.repo.BuscarCooperativaPorID(uint(id))
 	if !ok {
 		return models.Cooperativa{}, ErrNoEncontrado
 	}
@@ -30,7 +30,7 @@ func (s *CooperativaService) Crear(a models.Cooperativa) (models.Cooperativa, er
 	if err := validacionCooperativa(a); err != nil {
 		return models.Cooperativa{}, err
 	}
-	return s.repo.AgregarCooperativa(a), nil
+	return s.repo.CrearCooperativa(a), nil
 }
 
 func (s *CooperativaService) Actualizar(id int, a models.Cooperativa) (models.Cooperativa, error) {
@@ -45,7 +45,7 @@ func (s *CooperativaService) Actualizar(id int, a models.Cooperativa) (models.Co
 }
 
 func (s *CooperativaService) Borrar(id int) error {
-	if !s.repo.EliminarCooperativa(uint(id)) {
+	if !s.repo.BorrarCooperativa(uint(id)) {
 		return ErrNoEncontrado
 	}
 	return nil

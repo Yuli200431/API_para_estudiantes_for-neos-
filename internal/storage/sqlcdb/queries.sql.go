@@ -7,15 +7,15 @@ package sqlcdb
 
 import (
 	"context"
-	"database/sql"
 )
 
-const actualizarAlimentacion = `-- name: ActualizarAlimentacion :exec
-UPDATE alimentacion SET
-    nombre_local = ?, descripcion = ?, ubicacion = ?, direccion = ?,
+const actualizarAlimentacion = `-- name: ActualizarAlimentacion :one
+UPDATE alimentacion
+SET nombre_local = ?, descripcion = ?, ubicacion = ?, direccion = ?,
     horario_apertura = ?, horario_cierre = ?, telefono = ?,
     tipo_comida = ?, precio_promedio = ?, provider_id = ?
 WHERE id = ?
+RETURNING id, nombre_local, descripcion, ubicacion, direccion, horario_apertura, horario_cierre, telefono, tipo_comida, precio_promedio, provider_id
 `
 
 type ActualizarAlimentacionParams struct {
@@ -32,8 +32,8 @@ type ActualizarAlimentacionParams struct {
 	ID              int64
 }
 
-func (q *Queries) ActualizarAlimentacion(ctx context.Context, arg ActualizarAlimentacionParams) error {
-	_, err := q.db.ExecContext(ctx, actualizarAlimentacion,
+func (q *Queries) ActualizarAlimentacion(ctx context.Context, arg ActualizarAlimentacionParams) (Alimentacion, error) {
+	row := q.db.QueryRowContext(ctx, actualizarAlimentacion,
 		arg.NombreLocal,
 		arg.Descripcion,
 		arg.Ubicacion,
@@ -46,13 +46,28 @@ func (q *Queries) ActualizarAlimentacion(ctx context.Context, arg ActualizarAlim
 		arg.ProviderID,
 		arg.ID,
 	)
-	return err
+	var i Alimentacion
+	err := row.Scan(
+		&i.ID,
+		&i.NombreLocal,
+		&i.Descripcion,
+		&i.Ubicacion,
+		&i.Direccion,
+		&i.HorarioApertura,
+		&i.HorarioCierre,
+		&i.Telefono,
+		&i.TipoComida,
+		&i.PrecioPromedio,
+		&i.ProviderID,
+	)
+	return i, err
 }
 
-const actualizarAplicarVivienda = `-- name: ActualizarAplicarVivienda :exec
-UPDATE aplicar_vivienda SET
-    estudiante_id = ?, vivienda_id = ?, estado = ?
+const actualizarAplicarVivienda = `-- name: ActualizarAplicarVivienda :one
+UPDATE aplicar_vivienda
+SET estudiante_id = ?, vivienda_id = ?, estado = ?
 WHERE aplicar_vivienda_id = ?
+RETURNING aplicar_vivienda_id, estudiante_id, vivienda_id, estado
 `
 
 type ActualizarAplicarViviendaParams struct {
@@ -62,20 +77,28 @@ type ActualizarAplicarViviendaParams struct {
 	AplicarViviendaID int64
 }
 
-func (q *Queries) ActualizarAplicarVivienda(ctx context.Context, arg ActualizarAplicarViviendaParams) error {
-	_, err := q.db.ExecContext(ctx, actualizarAplicarVivienda,
+func (q *Queries) ActualizarAplicarVivienda(ctx context.Context, arg ActualizarAplicarViviendaParams) (AplicarVivienda, error) {
+	row := q.db.QueryRowContext(ctx, actualizarAplicarVivienda,
 		arg.EstudianteID,
 		arg.ViviendaID,
 		arg.Estado,
 		arg.AplicarViviendaID,
 	)
-	return err
+	var i AplicarVivienda
+	err := row.Scan(
+		&i.AplicarViviendaID,
+		&i.EstudianteID,
+		&i.ViviendaID,
+		&i.Estado,
+	)
+	return i, err
 }
 
-const actualizarCooperativa = `-- name: ActualizarCooperativa :exec
-UPDATE cooperativa SET
-    nombre = ?, telefono = ?, descripcion = ?
+const actualizarCooperativa = `-- name: ActualizarCooperativa :one
+UPDATE cooperativa
+SET nombre = ?, telefono = ?, descripcion = ?
 WHERE id = ?
+RETURNING id, nombre, telefono, descripcion
 `
 
 type ActualizarCooperativaParams struct {
@@ -85,20 +108,28 @@ type ActualizarCooperativaParams struct {
 	ID          int64
 }
 
-func (q *Queries) ActualizarCooperativa(ctx context.Context, arg ActualizarCooperativaParams) error {
-	_, err := q.db.ExecContext(ctx, actualizarCooperativa,
+func (q *Queries) ActualizarCooperativa(ctx context.Context, arg ActualizarCooperativaParams) (Cooperativa, error) {
+	row := q.db.QueryRowContext(ctx, actualizarCooperativa,
 		arg.Nombre,
 		arg.Telefono,
 		arg.Descripcion,
 		arg.ID,
 	)
-	return err
+	var i Cooperativa
+	err := row.Scan(
+		&i.ID,
+		&i.Nombre,
+		&i.Telefono,
+		&i.Descripcion,
+	)
+	return i, err
 }
 
-const actualizarFoto = `-- name: ActualizarFoto :exec
-UPDATE foto SET
-    url = ?, vivienda_id = ?
+const actualizarFoto = `-- name: ActualizarFoto :one
+UPDATE foto
+SET url = ?, vivienda_id = ?
 WHERE foto_id = ?
+RETURNING foto_id, url, vivienda_id
 `
 
 type ActualizarFotoParams struct {
@@ -107,15 +138,18 @@ type ActualizarFotoParams struct {
 	FotoID     int64
 }
 
-func (q *Queries) ActualizarFoto(ctx context.Context, arg ActualizarFotoParams) error {
-	_, err := q.db.ExecContext(ctx, actualizarFoto, arg.Url, arg.ViviendaID, arg.FotoID)
-	return err
+func (q *Queries) ActualizarFoto(ctx context.Context, arg ActualizarFotoParams) (Foto, error) {
+	row := q.db.QueryRowContext(ctx, actualizarFoto, arg.Url, arg.ViviendaID, arg.FotoID)
+	var i Foto
+	err := row.Scan(&i.FotoID, &i.Url, &i.ViviendaID)
+	return i, err
 }
 
-const actualizarMenuDiario = `-- name: ActualizarMenuDiario :exec
-UPDATE menu_diario SET
-    fecha = ?, alimentacion_id = ?
+const actualizarMenuDiario = `-- name: ActualizarMenuDiario :one
+UPDATE menu_diario
+SET fecha = ?, alimentacion_id = ?
 WHERE id = ?
+RETURNING id, fecha, alimentacion_id
 `
 
 type ActualizarMenuDiarioParams struct {
@@ -124,16 +158,50 @@ type ActualizarMenuDiarioParams struct {
 	ID             int64
 }
 
-func (q *Queries) ActualizarMenuDiario(ctx context.Context, arg ActualizarMenuDiarioParams) error {
-	_, err := q.db.ExecContext(ctx, actualizarMenuDiario, arg.Fecha, arg.AlimentacionID, arg.ID)
-	return err
+func (q *Queries) ActualizarMenuDiario(ctx context.Context, arg ActualizarMenuDiarioParams) (MenuDiario, error) {
+	row := q.db.QueryRowContext(ctx, actualizarMenuDiario, arg.Fecha, arg.AlimentacionID, arg.ID)
+	var i MenuDiario
+	err := row.Scan(&i.ID, &i.Fecha, &i.AlimentacionID)
+	return i, err
 }
 
-const actualizarPlato = `-- name: ActualizarPlato :exec
-UPDATE plato SET
-    nombre_plato = ?, descripcion = ?, categoria = ?,
+const actualizarParada = `-- name: ActualizarParada :one
+UPDATE paradas_bus
+SET nombre_parada = ?, direccion = ?, descripcion = ?
+WHERE id = ?
+RETURNING id, nombre_parada, direccion, descripcion
+`
+
+type ActualizarParadaParams struct {
+	NombreParada string
+	Direccion    string
+	Descripcion  string
+	ID           int64
+}
+
+func (q *Queries) ActualizarParada(ctx context.Context, arg ActualizarParadaParams) (ParadasBus, error) {
+	row := q.db.QueryRowContext(ctx, actualizarParada,
+		arg.NombreParada,
+		arg.Direccion,
+		arg.Descripcion,
+		arg.ID,
+	)
+	var i ParadasBus
+	err := row.Scan(
+		&i.ID,
+		&i.NombreParada,
+		&i.Direccion,
+		&i.Descripcion,
+	)
+	return i, err
+}
+
+const actualizarPlato = `-- name: ActualizarPlato :one
+UPDATE plato
+SET nombre_plato = ?, descripcion = ?, categoria = ?,
     precio = ?, menu_diario_id = ?
 WHERE id = ?
+RETURNING id, nombre_plato, descripcion, categoria, precio, menu_diario_id
 `
 
 type ActualizarPlatoParams struct {
@@ -145,8 +213,8 @@ type ActualizarPlatoParams struct {
 	ID           int64
 }
 
-func (q *Queries) ActualizarPlato(ctx context.Context, arg ActualizarPlatoParams) error {
-	_, err := q.db.ExecContext(ctx, actualizarPlato,
+func (q *Queries) ActualizarPlato(ctx context.Context, arg ActualizarPlatoParams) (Plato, error) {
+	row := q.db.QueryRowContext(ctx, actualizarPlato,
 		arg.NombrePlato,
 		arg.Descripcion,
 		arg.Categoria,
@@ -154,13 +222,23 @@ func (q *Queries) ActualizarPlato(ctx context.Context, arg ActualizarPlatoParams
 		arg.MenuDiarioID,
 		arg.ID,
 	)
-	return err
+	var i Plato
+	err := row.Scan(
+		&i.ID,
+		&i.NombrePlato,
+		&i.Descripcion,
+		&i.Categoria,
+		&i.Precio,
+		&i.MenuDiarioID,
+	)
+	return i, err
 }
 
-const actualizarResena = `-- name: ActualizarResena :exec
-UPDATE resena SET
-    comentario = ?, calificacion = ?, alimentacion_id = ?
+const actualizarResena = `-- name: ActualizarResena :one
+UPDATE resena
+SET comentario = ?, calificacion = ?, alimentacion_id = ?
 WHERE id = ?
+RETURNING id, comentario, calificacion, alimentacion_id
 `
 
 type ActualizarResenaParams struct {
@@ -170,22 +248,30 @@ type ActualizarResenaParams struct {
 	ID             int64
 }
 
-func (q *Queries) ActualizarResena(ctx context.Context, arg ActualizarResenaParams) error {
-	_, err := q.db.ExecContext(ctx, actualizarResena,
+func (q *Queries) ActualizarResena(ctx context.Context, arg ActualizarResenaParams) (Resena, error) {
+	row := q.db.QueryRowContext(ctx, actualizarResena,
 		arg.Comentario,
 		arg.Calificacion,
 		arg.AlimentacionID,
 		arg.ID,
 	)
-	return err
+	var i Resena
+	err := row.Scan(
+		&i.ID,
+		&i.Comentario,
+		&i.Calificacion,
+		&i.AlimentacionID,
+	)
+	return i, err
 }
 
-const actualizarRuta = `-- name: ActualizarRuta :exec
-UPDATE ruta_transporte SET
-    nombre_linea = ?, frecuencia_aprox = ?, precio = ?,
+const actualizarRuta = `-- name: ActualizarRuta :one
+UPDATE ruta_transporte
+SET nombre_linea = ?, frecuencia_aprox = ?, precio = ?,
     descripcion_ruta = ?, cooperativa_id = ?,
-    sector_origen_id = ?, sector_destino_id = ?, provider_id = ?
+    sector_origen_id = ?, sector_destino_id = ?, parada_bus_id = ?  
 WHERE id = ?
+RETURNING id, nombre_linea, frecuencia_aprox, precio, descripcion_ruta, cooperativa_id, sector_origen_id, sector_destino_id, parada_bus_id
 `
 
 type ActualizarRutaParams struct {
@@ -196,12 +282,12 @@ type ActualizarRutaParams struct {
 	CooperativaID   int64
 	SectorOrigenID  int64
 	SectorDestinoID int64
-	ProviderID      int64
+	ParadaBusID     int64
 	ID              int64
 }
 
-func (q *Queries) ActualizarRuta(ctx context.Context, arg ActualizarRutaParams) error {
-	_, err := q.db.ExecContext(ctx, actualizarRuta,
+func (q *Queries) ActualizarRuta(ctx context.Context, arg ActualizarRutaParams) (RutaTransporte, error) {
+	row := q.db.QueryRowContext(ctx, actualizarRuta,
 		arg.NombreLinea,
 		arg.FrecuenciaAprox,
 		arg.Precio,
@@ -209,37 +295,69 @@ func (q *Queries) ActualizarRuta(ctx context.Context, arg ActualizarRutaParams) 
 		arg.CooperativaID,
 		arg.SectorOrigenID,
 		arg.SectorDestinoID,
-		arg.ProviderID,
+		arg.ParadaBusID,
 		arg.ID,
 	)
-	return err
+	var i RutaTransporte
+	err := row.Scan(
+		&i.ID,
+		&i.NombreLinea,
+		&i.FrecuenciaAprox,
+		&i.Precio,
+		&i.DescripcionRuta,
+		&i.CooperativaID,
+		&i.SectorOrigenID,
+		&i.SectorDestinoID,
+		&i.ParadaBusID,
+	)
+	return i, err
 }
 
-const actualizarVivienda = `-- name: ActualizarVivienda :exec
-UPDATE vivienda SET
-    titulo = ?, tipo_vivienda = ?, precio = ?, garantia = ?,
+const actualizarSector = `-- name: ActualizarSector :one
+UPDATE sector
+SET nombre = ?
+WHERE sector_id = ?
+RETURNING sector_id, nombre
+`
+
+type ActualizarSectorParams struct {
+	Nombre   string
+	SectorID int64
+}
+
+func (q *Queries) ActualizarSector(ctx context.Context, arg ActualizarSectorParams) (Sector, error) {
+	row := q.db.QueryRowContext(ctx, actualizarSector, arg.Nombre, arg.SectorID)
+	var i Sector
+	err := row.Scan(&i.SectorID, &i.Nombre)
+	return i, err
+}
+
+const actualizarVivienda = `-- name: ActualizarVivienda :one
+UPDATE vivienda
+SET titulo = ?, tipo_vivienda = ?, precio = ?, garantia = ?,
     precio_garantia = ?, direccion = ?, luz = ?, agua = ?,
     amueblado = ?, internet = ?, bano_privado = ?,
     numero_habitaciones = ?, mascotas = ?, genero_preferido = ?,
     reglas_convivencia = ?, telefono = ?, email = ?,
     estado = ?, comentario = ?, sector_id = ?, proveedor_id = ?
 WHERE vivienda_id = ?
+RETURNING vivienda_id, titulo, tipo_vivienda, precio, garantia, precio_garantia, direccion, luz, agua, amueblado, internet, bano_privado, numero_habitaciones, mascotas, genero_preferido, reglas_convivencia, telefono, email, estado, comentario, sector_id, proveedor_id
 `
 
 type ActualizarViviendaParams struct {
 	Titulo             string
 	TipoVivienda       string
 	Precio             float64
-	Garantia           sql.NullInt64
+	Garantia           bool
 	PrecioGarantia     float64
 	Direccion          string
-	Luz                sql.NullInt64
-	Agua               sql.NullInt64
-	Amueblado          sql.NullInt64
-	Internet           sql.NullInt64
-	BanoPrivado        sql.NullInt64
+	Luz                bool
+	Agua               bool
+	Amueblado          bool
+	Internet           bool
+	BanoPrivado        bool
 	NumeroHabitaciones int64
-	Mascotas           sql.NullInt64
+	Mascotas           bool
 	GeneroPreferido    string
 	ReglasConvivencia  string
 	Telefono           string
@@ -251,8 +369,8 @@ type ActualizarViviendaParams struct {
 	ViviendaID         int64
 }
 
-func (q *Queries) ActualizarVivienda(ctx context.Context, arg ActualizarViviendaParams) error {
-	_, err := q.db.ExecContext(ctx, actualizarVivienda,
+func (q *Queries) ActualizarVivienda(ctx context.Context, arg ActualizarViviendaParams) (Vivienda, error) {
+	row := q.db.QueryRowContext(ctx, actualizarVivienda,
 		arg.Titulo,
 		arg.TipoVivienda,
 		arg.Precio,
@@ -276,15 +394,362 @@ func (q *Queries) ActualizarVivienda(ctx context.Context, arg ActualizarVivienda
 		arg.ProveedorID,
 		arg.ViviendaID,
 	)
-	return err
+	var i Vivienda
+	err := row.Scan(
+		&i.ViviendaID,
+		&i.Titulo,
+		&i.TipoVivienda,
+		&i.Precio,
+		&i.Garantia,
+		&i.PrecioGarantia,
+		&i.Direccion,
+		&i.Luz,
+		&i.Agua,
+		&i.Amueblado,
+		&i.Internet,
+		&i.BanoPrivado,
+		&i.NumeroHabitaciones,
+		&i.Mascotas,
+		&i.GeneroPreferido,
+		&i.ReglasConvivencia,
+		&i.Telefono,
+		&i.Email,
+		&i.Estado,
+		&i.Comentario,
+		&i.SectorID,
+		&i.ProveedorID,
+	)
+	return i, err
 }
 
-const crearAlimentacion = `-- name: CrearAlimentacion :exec
-INSERT INTO alimentacion (
-    nombre_local, descripcion, ubicacion, direccion,
-    horario_apertura, horario_cierre, telefono,
-    tipo_comida, precio_promedio, provider_id
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+const borrarAlimentacion = `-- name: BorrarAlimentacion :execrows
+DELETE FROM alimentacion WHERE id = ?
+`
+
+func (q *Queries) BorrarAlimentacion(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarAlimentacion, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const borrarAplicarVivienda = `-- name: BorrarAplicarVivienda :execrows
+DELETE FROM aplicar_vivienda WHERE aplicar_vivienda_id = ?
+`
+
+func (q *Queries) BorrarAplicarVivienda(ctx context.Context, aplicarViviendaID int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarAplicarVivienda, aplicarViviendaID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const borrarCooperativa = `-- name: BorrarCooperativa :execrows
+DELETE FROM cooperativa WHERE id = ?
+`
+
+func (q *Queries) BorrarCooperativa(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarCooperativa, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const borrarFoto = `-- name: BorrarFoto :execrows
+DELETE FROM foto WHERE foto_id = ?
+`
+
+func (q *Queries) BorrarFoto(ctx context.Context, fotoID int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarFoto, fotoID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const borrarMenuDiario = `-- name: BorrarMenuDiario :execrows
+DELETE FROM menu_diario WHERE id = ?
+`
+
+func (q *Queries) BorrarMenuDiario(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarMenuDiario, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const borrarParada = `-- name: BorrarParada :execrows
+DELETE FROM paradas_bus WHERE id = ?
+`
+
+func (q *Queries) BorrarParada(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarParada, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const borrarPlato = `-- name: BorrarPlato :execrows
+DELETE FROM plato WHERE id = ?
+`
+
+func (q *Queries) BorrarPlato(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarPlato, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const borrarResena = `-- name: BorrarResena :execrows
+DELETE FROM resena WHERE id = ?
+`
+
+func (q *Queries) BorrarResena(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarResena, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const borrarRuta = `-- name: BorrarRuta :execrows
+DELETE FROM ruta_transporte WHERE id = ?
+`
+
+func (q *Queries) BorrarRuta(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarRuta, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const borrarSector = `-- name: BorrarSector :execrows
+DELETE FROM sector WHERE sector_id = ?
+`
+
+func (q *Queries) BorrarSector(ctx context.Context, sectorID int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarSector, sectorID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const buscarAlimentacionPorID = `-- name: BuscarAlimentacionPorID :one
+SELECT id, nombre_local, descripcion, ubicacion, direccion, horario_apertura, horario_cierre, telefono, tipo_comida, precio_promedio, provider_id FROM alimentacion
+WHERE id = ?
+`
+
+func (q *Queries) BuscarAlimentacionPorID(ctx context.Context, id int64) (Alimentacion, error) {
+	row := q.db.QueryRowContext(ctx, buscarAlimentacionPorID, id)
+	var i Alimentacion
+	err := row.Scan(
+		&i.ID,
+		&i.NombreLocal,
+		&i.Descripcion,
+		&i.Ubicacion,
+		&i.Direccion,
+		&i.HorarioApertura,
+		&i.HorarioCierre,
+		&i.Telefono,
+		&i.TipoComida,
+		&i.PrecioPromedio,
+		&i.ProviderID,
+	)
+	return i, err
+}
+
+const buscarAplicarViviendaPorID = `-- name: BuscarAplicarViviendaPorID :one
+SELECT aplicar_vivienda_id, estudiante_id, vivienda_id, estado FROM aplicar_vivienda
+WHERE aplicar_vivienda_id = ?
+`
+
+func (q *Queries) BuscarAplicarViviendaPorID(ctx context.Context, aplicarViviendaID int64) (AplicarVivienda, error) {
+	row := q.db.QueryRowContext(ctx, buscarAplicarViviendaPorID, aplicarViviendaID)
+	var i AplicarVivienda
+	err := row.Scan(
+		&i.AplicarViviendaID,
+		&i.EstudianteID,
+		&i.ViviendaID,
+		&i.Estado,
+	)
+	return i, err
+}
+
+const buscarCooperativaPorID = `-- name: BuscarCooperativaPorID :one
+SELECT id, nombre, telefono, descripcion FROM cooperativa
+WHERE id = ?
+`
+
+func (q *Queries) BuscarCooperativaPorID(ctx context.Context, id int64) (Cooperativa, error) {
+	row := q.db.QueryRowContext(ctx, buscarCooperativaPorID, id)
+	var i Cooperativa
+	err := row.Scan(
+		&i.ID,
+		&i.Nombre,
+		&i.Telefono,
+		&i.Descripcion,
+	)
+	return i, err
+}
+
+const buscarFotoPorID = `-- name: BuscarFotoPorID :one
+SELECT foto_id, url, vivienda_id FROM foto
+WHERE foto_id = ?
+`
+
+func (q *Queries) BuscarFotoPorID(ctx context.Context, fotoID int64) (Foto, error) {
+	row := q.db.QueryRowContext(ctx, buscarFotoPorID, fotoID)
+	var i Foto
+	err := row.Scan(&i.FotoID, &i.Url, &i.ViviendaID)
+	return i, err
+}
+
+const buscarMenuDiarioPorID = `-- name: BuscarMenuDiarioPorID :one
+SELECT id, fecha, alimentacion_id FROM menu_diario
+WHERE id = ?
+`
+
+func (q *Queries) BuscarMenuDiarioPorID(ctx context.Context, id int64) (MenuDiario, error) {
+	row := q.db.QueryRowContext(ctx, buscarMenuDiarioPorID, id)
+	var i MenuDiario
+	err := row.Scan(&i.ID, &i.Fecha, &i.AlimentacionID)
+	return i, err
+}
+
+const buscarParadaPorID = `-- name: BuscarParadaPorID :one
+SELECT id, nombre_parada, direccion, descripcion FROM paradas_bus
+WHERE id = ?
+`
+
+func (q *Queries) BuscarParadaPorID(ctx context.Context, id int64) (ParadasBus, error) {
+	row := q.db.QueryRowContext(ctx, buscarParadaPorID, id)
+	var i ParadasBus
+	err := row.Scan(
+		&i.ID,
+		&i.NombreParada,
+		&i.Direccion,
+		&i.Descripcion,
+	)
+	return i, err
+}
+
+const buscarPlatoPorID = `-- name: BuscarPlatoPorID :one
+SELECT id, nombre_plato, descripcion, categoria, precio, menu_diario_id FROM plato
+WHERE id = ?
+`
+
+func (q *Queries) BuscarPlatoPorID(ctx context.Context, id int64) (Plato, error) {
+	row := q.db.QueryRowContext(ctx, buscarPlatoPorID, id)
+	var i Plato
+	err := row.Scan(
+		&i.ID,
+		&i.NombrePlato,
+		&i.Descripcion,
+		&i.Categoria,
+		&i.Precio,
+		&i.MenuDiarioID,
+	)
+	return i, err
+}
+
+const buscarResenaPorID = `-- name: BuscarResenaPorID :one
+SELECT id, comentario, calificacion, alimentacion_id FROM resena
+WHERE id = ?
+`
+
+func (q *Queries) BuscarResenaPorID(ctx context.Context, id int64) (Resena, error) {
+	row := q.db.QueryRowContext(ctx, buscarResenaPorID, id)
+	var i Resena
+	err := row.Scan(
+		&i.ID,
+		&i.Comentario,
+		&i.Calificacion,
+		&i.AlimentacionID,
+	)
+	return i, err
+}
+
+const buscarRutaPorID = `-- name: BuscarRutaPorID :one
+SELECT id, nombre_linea, frecuencia_aprox, precio, descripcion_ruta, cooperativa_id, sector_origen_id, sector_destino_id, parada_bus_id FROM ruta_transporte
+WHERE id = ?
+`
+
+func (q *Queries) BuscarRutaPorID(ctx context.Context, id int64) (RutaTransporte, error) {
+	row := q.db.QueryRowContext(ctx, buscarRutaPorID, id)
+	var i RutaTransporte
+	err := row.Scan(
+		&i.ID,
+		&i.NombreLinea,
+		&i.FrecuenciaAprox,
+		&i.Precio,
+		&i.DescripcionRuta,
+		&i.CooperativaID,
+		&i.SectorOrigenID,
+		&i.SectorDestinoID,
+		&i.ParadaBusID,
+	)
+	return i, err
+}
+
+const buscarSectorPorID = `-- name: BuscarSectorPorID :one
+SELECT sector_id, nombre FROM sector
+WHERE sector_id = ?
+`
+
+func (q *Queries) BuscarSectorPorID(ctx context.Context, sectorID int64) (Sector, error) {
+	row := q.db.QueryRowContext(ctx, buscarSectorPorID, sectorID)
+	var i Sector
+	err := row.Scan(&i.SectorID, &i.Nombre)
+	return i, err
+}
+
+const buscarViviendaPorID = `-- name: BuscarViviendaPorID :one
+SELECT vivienda_id, titulo, tipo_vivienda, precio, garantia, precio_garantia, direccion, luz, agua, amueblado, internet, bano_privado, numero_habitaciones, mascotas, genero_preferido, reglas_convivencia, telefono, email, estado, comentario, sector_id, proveedor_id FROM vivienda
+WHERE vivienda_id = ?
+`
+
+func (q *Queries) BuscarViviendaPorID(ctx context.Context, viviendaID int64) (Vivienda, error) {
+	row := q.db.QueryRowContext(ctx, buscarViviendaPorID, viviendaID)
+	var i Vivienda
+	err := row.Scan(
+		&i.ViviendaID,
+		&i.Titulo,
+		&i.TipoVivienda,
+		&i.Precio,
+		&i.Garantia,
+		&i.PrecioGarantia,
+		&i.Direccion,
+		&i.Luz,
+		&i.Agua,
+		&i.Amueblado,
+		&i.Internet,
+		&i.BanoPrivado,
+		&i.NumeroHabitaciones,
+		&i.Mascotas,
+		&i.GeneroPreferido,
+		&i.ReglasConvivencia,
+		&i.Telefono,
+		&i.Email,
+		&i.Estado,
+		&i.Comentario,
+		&i.SectorID,
+		&i.ProveedorID,
+	)
+	return i, err
+}
+
+const crearAlimentacion = `-- name: CrearAlimentacion :one
+INSERT INTO alimentacion (nombre_local, descripcion, ubicacion, direccion, horario_apertura, horario_cierre, telefono, tipo_comida, precio_promedio, provider_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, nombre_local, descripcion, ubicacion, direccion, horario_apertura, horario_cierre, telefono, tipo_comida, precio_promedio, provider_id
 `
 
 type CrearAlimentacionParams struct {
@@ -300,8 +765,8 @@ type CrearAlimentacionParams struct {
 	ProviderID      int64
 }
 
-func (q *Queries) CrearAlimentacion(ctx context.Context, arg CrearAlimentacionParams) error {
-	_, err := q.db.ExecContext(ctx, crearAlimentacion,
+func (q *Queries) CrearAlimentacion(ctx context.Context, arg CrearAlimentacionParams) (Alimentacion, error) {
+	row := q.db.QueryRowContext(ctx, crearAlimentacion,
 		arg.NombreLocal,
 		arg.Descripcion,
 		arg.Ubicacion,
@@ -313,12 +778,27 @@ func (q *Queries) CrearAlimentacion(ctx context.Context, arg CrearAlimentacionPa
 		arg.PrecioPromedio,
 		arg.ProviderID,
 	)
-	return err
+	var i Alimentacion
+	err := row.Scan(
+		&i.ID,
+		&i.NombreLocal,
+		&i.Descripcion,
+		&i.Ubicacion,
+		&i.Direccion,
+		&i.HorarioApertura,
+		&i.HorarioCierre,
+		&i.Telefono,
+		&i.TipoComida,
+		&i.PrecioPromedio,
+		&i.ProviderID,
+	)
+	return i, err
 }
 
-const crearAplicarVivienda = `-- name: CrearAplicarVivienda :exec
+const crearAplicarVivienda = `-- name: CrearAplicarVivienda :one
 INSERT INTO aplicar_vivienda (estudiante_id, vivienda_id, estado)
 VALUES (?, ?, ?)
+RETURNING aplicar_vivienda_id, estudiante_id, vivienda_id, estado
 `
 
 type CrearAplicarViviendaParams struct {
@@ -327,14 +807,22 @@ type CrearAplicarViviendaParams struct {
 	Estado       string
 }
 
-func (q *Queries) CrearAplicarVivienda(ctx context.Context, arg CrearAplicarViviendaParams) error {
-	_, err := q.db.ExecContext(ctx, crearAplicarVivienda, arg.EstudianteID, arg.ViviendaID, arg.Estado)
-	return err
+func (q *Queries) CrearAplicarVivienda(ctx context.Context, arg CrearAplicarViviendaParams) (AplicarVivienda, error) {
+	row := q.db.QueryRowContext(ctx, crearAplicarVivienda, arg.EstudianteID, arg.ViviendaID, arg.Estado)
+	var i AplicarVivienda
+	err := row.Scan(
+		&i.AplicarViviendaID,
+		&i.EstudianteID,
+		&i.ViviendaID,
+		&i.Estado,
+	)
+	return i, err
 }
 
-const crearCooperativa = `-- name: CrearCooperativa :exec
+const crearCooperativa = `-- name: CrearCooperativa :one
 INSERT INTO cooperativa (nombre, telefono, descripcion)
 VALUES (?, ?, ?)
+RETURNING id, nombre, telefono, descripcion
 `
 
 type CrearCooperativaParams struct {
@@ -343,14 +831,22 @@ type CrearCooperativaParams struct {
 	Descripcion string
 }
 
-func (q *Queries) CrearCooperativa(ctx context.Context, arg CrearCooperativaParams) error {
-	_, err := q.db.ExecContext(ctx, crearCooperativa, arg.Nombre, arg.Telefono, arg.Descripcion)
-	return err
+func (q *Queries) CrearCooperativa(ctx context.Context, arg CrearCooperativaParams) (Cooperativa, error) {
+	row := q.db.QueryRowContext(ctx, crearCooperativa, arg.Nombre, arg.Telefono, arg.Descripcion)
+	var i Cooperativa
+	err := row.Scan(
+		&i.ID,
+		&i.Nombre,
+		&i.Telefono,
+		&i.Descripcion,
+	)
+	return i, err
 }
 
-const crearFoto = `-- name: CrearFoto :exec
+const crearFoto = `-- name: CrearFoto :one
 INSERT INTO foto (url, vivienda_id)
 VALUES (?, ?)
+RETURNING foto_id, url, vivienda_id
 `
 
 type CrearFotoParams struct {
@@ -358,14 +854,17 @@ type CrearFotoParams struct {
 	ViviendaID int64
 }
 
-func (q *Queries) CrearFoto(ctx context.Context, arg CrearFotoParams) error {
-	_, err := q.db.ExecContext(ctx, crearFoto, arg.Url, arg.ViviendaID)
-	return err
+func (q *Queries) CrearFoto(ctx context.Context, arg CrearFotoParams) (Foto, error) {
+	row := q.db.QueryRowContext(ctx, crearFoto, arg.Url, arg.ViviendaID)
+	var i Foto
+	err := row.Scan(&i.FotoID, &i.Url, &i.ViviendaID)
+	return i, err
 }
 
-const crearMenuDiario = `-- name: CrearMenuDiario :exec
+const crearMenuDiario = `-- name: CrearMenuDiario :one
 INSERT INTO menu_diario (fecha, alimentacion_id)
 VALUES (?, ?)
+RETURNING id, fecha, alimentacion_id
 `
 
 type CrearMenuDiarioParams struct {
@@ -373,15 +872,41 @@ type CrearMenuDiarioParams struct {
 	AlimentacionID int64
 }
 
-func (q *Queries) CrearMenuDiario(ctx context.Context, arg CrearMenuDiarioParams) error {
-	_, err := q.db.ExecContext(ctx, crearMenuDiario, arg.Fecha, arg.AlimentacionID)
-	return err
+func (q *Queries) CrearMenuDiario(ctx context.Context, arg CrearMenuDiarioParams) (MenuDiario, error) {
+	row := q.db.QueryRowContext(ctx, crearMenuDiario, arg.Fecha, arg.AlimentacionID)
+	var i MenuDiario
+	err := row.Scan(&i.ID, &i.Fecha, &i.AlimentacionID)
+	return i, err
 }
 
-const crearPlato = `-- name: CrearPlato :exec
-INSERT INTO plato (
-    nombre_plato, descripcion, categoria, precio, menu_diario_id
-) VALUES (?, ?, ?, ?, ?)
+const crearParada = `-- name: CrearParada :one
+INSERT INTO paradas_bus (nombre_parada, direccion, descripcion)
+VALUES (?, ?, ?)
+RETURNING id, nombre_parada, direccion, descripcion
+`
+
+type CrearParadaParams struct {
+	NombreParada string
+	Direccion    string
+	Descripcion  string
+}
+
+func (q *Queries) CrearParada(ctx context.Context, arg CrearParadaParams) (ParadasBus, error) {
+	row := q.db.QueryRowContext(ctx, crearParada, arg.NombreParada, arg.Direccion, arg.Descripcion)
+	var i ParadasBus
+	err := row.Scan(
+		&i.ID,
+		&i.NombreParada,
+		&i.Direccion,
+		&i.Descripcion,
+	)
+	return i, err
+}
+
+const crearPlato = `-- name: CrearPlato :one
+INSERT INTO plato (nombre_plato, descripcion, categoria, precio, menu_diario_id)
+VALUES (?, ?, ?, ?, ?)
+RETURNING id, nombre_plato, descripcion, categoria, precio, menu_diario_id
 `
 
 type CrearPlatoParams struct {
@@ -392,20 +917,30 @@ type CrearPlatoParams struct {
 	MenuDiarioID int64
 }
 
-func (q *Queries) CrearPlato(ctx context.Context, arg CrearPlatoParams) error {
-	_, err := q.db.ExecContext(ctx, crearPlato,
+func (q *Queries) CrearPlato(ctx context.Context, arg CrearPlatoParams) (Plato, error) {
+	row := q.db.QueryRowContext(ctx, crearPlato,
 		arg.NombrePlato,
 		arg.Descripcion,
 		arg.Categoria,
 		arg.Precio,
 		arg.MenuDiarioID,
 	)
-	return err
+	var i Plato
+	err := row.Scan(
+		&i.ID,
+		&i.NombrePlato,
+		&i.Descripcion,
+		&i.Categoria,
+		&i.Precio,
+		&i.MenuDiarioID,
+	)
+	return i, err
 }
 
-const crearResena = `-- name: CrearResena :exec
+const crearResena = `-- name: CrearResena :one
 INSERT INTO resena (comentario, calificacion, alimentacion_id)
 VALUES (?, ?, ?)
+RETURNING id, comentario, calificacion, alimentacion_id
 `
 
 type CrearResenaParams struct {
@@ -414,16 +949,22 @@ type CrearResenaParams struct {
 	AlimentacionID int64
 }
 
-func (q *Queries) CrearResena(ctx context.Context, arg CrearResenaParams) error {
-	_, err := q.db.ExecContext(ctx, crearResena, arg.Comentario, arg.Calificacion, arg.AlimentacionID)
-	return err
+func (q *Queries) CrearResena(ctx context.Context, arg CrearResenaParams) (Resena, error) {
+	row := q.db.QueryRowContext(ctx, crearResena, arg.Comentario, arg.Calificacion, arg.AlimentacionID)
+	var i Resena
+	err := row.Scan(
+		&i.ID,
+		&i.Comentario,
+		&i.Calificacion,
+		&i.AlimentacionID,
+	)
+	return i, err
 }
 
-const crearRuta = `-- name: CrearRuta :exec
-INSERT INTO ruta_transporte (
-    nombre_linea, frecuencia_aprox, precio, descripcion_ruta,
-    cooperativa_id, sector_origen_id, sector_destino_id, provider_id
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+const crearRuta = `-- name: CrearRuta :one
+INSERT INTO ruta_transporte (nombre_linea, frecuencia_aprox, precio, descripcion_ruta, cooperativa_id, sector_origen_id, sector_destino_id, parada_bus_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, nombre_linea, frecuencia_aprox, precio, descripcion_ruta, cooperativa_id, sector_origen_id, sector_destino_id, parada_bus_id
 `
 
 type CrearRutaParams struct {
@@ -434,11 +975,11 @@ type CrearRutaParams struct {
 	CooperativaID   int64
 	SectorOrigenID  int64
 	SectorDestinoID int64
-	ProviderID      int64
+	ParadaBusID     int64
 }
 
-func (q *Queries) CrearRuta(ctx context.Context, arg CrearRutaParams) error {
-	_, err := q.db.ExecContext(ctx, crearRuta,
+func (q *Queries) CrearRuta(ctx context.Context, arg CrearRutaParams) (RutaTransporte, error) {
+	row := q.db.QueryRowContext(ctx, crearRuta,
 		arg.NombreLinea,
 		arg.FrecuenciaAprox,
 		arg.Precio,
@@ -446,34 +987,56 @@ func (q *Queries) CrearRuta(ctx context.Context, arg CrearRutaParams) error {
 		arg.CooperativaID,
 		arg.SectorOrigenID,
 		arg.SectorDestinoID,
-		arg.ProviderID,
+		arg.ParadaBusID,
 	)
-	return err
+	var i RutaTransporte
+	err := row.Scan(
+		&i.ID,
+		&i.NombreLinea,
+		&i.FrecuenciaAprox,
+		&i.Precio,
+		&i.DescripcionRuta,
+		&i.CooperativaID,
+		&i.SectorOrigenID,
+		&i.SectorDestinoID,
+		&i.ParadaBusID,
+	)
+	return i, err
 }
 
-const crearVivienda = `-- name: CrearVivienda :exec
-INSERT INTO vivienda (
-    titulo, tipo_vivienda, precio, garantia, precio_garantia,
-    direccion, luz, agua, amueblado, internet, bano_privado,
-    numero_habitaciones, mascotas, genero_preferido, reglas_convivencia,
-    telefono, email, estado, comentario, sector_id, proveedor_id
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+const crearSector = `-- name: CrearSector :one
+INSERT INTO sector (nombre)
+VALUES (?)
+RETURNING sector_id, nombre
+`
+
+func (q *Queries) CrearSector(ctx context.Context, nombre string) (Sector, error) {
+	row := q.db.QueryRowContext(ctx, crearSector, nombre)
+	var i Sector
+	err := row.Scan(&i.SectorID, &i.Nombre)
+	return i, err
+}
+
+const crearVivienda = `-- name: CrearVivienda :one
+INSERT INTO vivienda (titulo, tipo_vivienda, precio, garantia, precio_garantia, direccion, luz, agua, amueblado, internet, bano_privado, numero_habitaciones, mascotas, genero_preferido, reglas_convivencia, telefono, email, estado, comentario, sector_id, proveedor_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING vivienda_id, titulo, tipo_vivienda, precio, garantia, precio_garantia, direccion, luz, agua, amueblado, internet, bano_privado, numero_habitaciones, mascotas, genero_preferido, reglas_convivencia, telefono, email, estado, comentario, sector_id, proveedor_id
 `
 
 type CrearViviendaParams struct {
 	Titulo             string
 	TipoVivienda       string
 	Precio             float64
-	Garantia           sql.NullInt64
+	Garantia           bool
 	PrecioGarantia     float64
 	Direccion          string
-	Luz                sql.NullInt64
-	Agua               sql.NullInt64
-	Amueblado          sql.NullInt64
-	Internet           sql.NullInt64
-	BanoPrivado        sql.NullInt64
+	Luz                bool
+	Agua               bool
+	Amueblado          bool
+	Internet           bool
+	BanoPrivado        bool
 	NumeroHabitaciones int64
-	Mascotas           sql.NullInt64
+	Mascotas           bool
 	GeneroPreferido    string
 	ReglasConvivencia  string
 	Telefono           string
@@ -484,8 +1047,8 @@ type CrearViviendaParams struct {
 	ProveedorID        int64
 }
 
-func (q *Queries) CrearVivienda(ctx context.Context, arg CrearViviendaParams) error {
-	_, err := q.db.ExecContext(ctx, crearVivienda,
+func (q *Queries) CrearVivienda(ctx context.Context, arg CrearViviendaParams) (Vivienda, error) {
+	row := q.db.QueryRowContext(ctx, crearVivienda,
 		arg.Titulo,
 		arg.TipoVivienda,
 		arg.Precio,
@@ -508,102 +1071,49 @@ func (q *Queries) CrearVivienda(ctx context.Context, arg CrearViviendaParams) er
 		arg.SectorID,
 		arg.ProveedorID,
 	)
-	return err
+	var i Vivienda
+	err := row.Scan(
+		&i.ViviendaID,
+		&i.Titulo,
+		&i.TipoVivienda,
+		&i.Precio,
+		&i.Garantia,
+		&i.PrecioGarantia,
+		&i.Direccion,
+		&i.Luz,
+		&i.Agua,
+		&i.Amueblado,
+		&i.Internet,
+		&i.BanoPrivado,
+		&i.NumeroHabitaciones,
+		&i.Mascotas,
+		&i.GeneroPreferido,
+		&i.ReglasConvivencia,
+		&i.Telefono,
+		&i.Email,
+		&i.Estado,
+		&i.Comentario,
+		&i.SectorID,
+		&i.ProveedorID,
+	)
+	return i, err
 }
 
-const eliminarAlimentacion = `-- name: EliminarAlimentacion :exec
-DELETE FROM alimentacion
-WHERE id = ?
+const eliminarVivienda = `-- name: EliminarVivienda :execrows
+DELETE FROM vivienda WHERE vivienda_id = ?
 `
 
-func (q *Queries) EliminarAlimentacion(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, eliminarAlimentacion, id)
-	return err
-}
-
-const eliminarAplicarVivienda = `-- name: EliminarAplicarVivienda :exec
-DELETE FROM aplicar_vivienda
-WHERE aplicar_vivienda_id = ?
-`
-
-func (q *Queries) EliminarAplicarVivienda(ctx context.Context, aplicarViviendaID int64) error {
-	_, err := q.db.ExecContext(ctx, eliminarAplicarVivienda, aplicarViviendaID)
-	return err
-}
-
-const eliminarCooperativa = `-- name: EliminarCooperativa :exec
-DELETE FROM cooperativa
-WHERE id = ?
-`
-
-func (q *Queries) EliminarCooperativa(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, eliminarCooperativa, id)
-	return err
-}
-
-const eliminarFoto = `-- name: EliminarFoto :exec
-DELETE FROM foto
-WHERE foto_id = ?
-`
-
-func (q *Queries) EliminarFoto(ctx context.Context, fotoID int64) error {
-	_, err := q.db.ExecContext(ctx, eliminarFoto, fotoID)
-	return err
-}
-
-const eliminarMenuDiario = `-- name: EliminarMenuDiario :exec
-DELETE FROM menu_diario
-WHERE id = ?
-`
-
-func (q *Queries) EliminarMenuDiario(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, eliminarMenuDiario, id)
-	return err
-}
-
-const eliminarPlato = `-- name: EliminarPlato :exec
-DELETE FROM plato
-WHERE id = ?
-`
-
-func (q *Queries) EliminarPlato(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, eliminarPlato, id)
-	return err
-}
-
-const eliminarResena = `-- name: EliminarResena :exec
-DELETE FROM resena
-WHERE id = ?
-`
-
-func (q *Queries) EliminarResena(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, eliminarResena, id)
-	return err
-}
-
-const eliminarRuta = `-- name: EliminarRuta :exec
-DELETE FROM ruta_transporte
-WHERE id = ?
-`
-
-func (q *Queries) EliminarRuta(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, eliminarRuta, id)
-	return err
-}
-
-const eliminarVivienda = `-- name: EliminarVivienda :exec
-DELETE FROM vivienda
-WHERE vivienda_id = ?
-`
-
-func (q *Queries) EliminarVivienda(ctx context.Context, viviendaID int64) error {
-	_, err := q.db.ExecContext(ctx, eliminarVivienda, viviendaID)
-	return err
+func (q *Queries) EliminarVivienda(ctx context.Context, viviendaID int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, eliminarVivienda, viviendaID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const listarAlimentaciones = `-- name: ListarAlimentaciones :many
 
-SELECT id, nombre_local, descripcion, ubicacion, direccion, horario_apertura, horario_cierre, telefono, tipo_comida, precio_promedio, provider_id FROM alimentacion
+SELECT id, nombre_local, descripcion,ubicacion, direccion, horario_apertura, horario_cierre, telefono, tipo_comida, precio_promedio, provider_id FROM alimentacion
 `
 
 // ALIMENTACION --
@@ -739,34 +1249,6 @@ func (q *Queries) ListarFotos(ctx context.Context) ([]Foto, error) {
 	return items, nil
 }
 
-const listarFotosPorVivienda = `-- name: ListarFotosPorVivienda :many
-SELECT foto_id, url, vivienda_id FROM foto
-WHERE vivienda_id = ?
-`
-
-func (q *Queries) ListarFotosPorVivienda(ctx context.Context, viviendaID int64) ([]Foto, error) {
-	rows, err := q.db.QueryContext(ctx, listarFotosPorVivienda, viviendaID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Foto
-	for rows.Next() {
-		var i Foto
-		if err := rows.Scan(&i.FotoID, &i.Url, &i.ViviendaID); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listarMenuDiarios = `-- name: ListarMenuDiarios :many
 
 SELECT id, fecha, alimentacion_id FROM menu_diario
@@ -796,21 +1278,27 @@ func (q *Queries) ListarMenuDiarios(ctx context.Context) ([]MenuDiario, error) {
 	return items, nil
 }
 
-const listarMenuDiariosPorAlimentacion = `-- name: ListarMenuDiariosPorAlimentacion :many
-SELECT id, fecha, alimentacion_id FROM menu_diario
-WHERE alimentacion_id = ?
+const listarParadas = `-- name: ListarParadas :many
+
+SELECT id, nombre_parada, direccion, descripcion FROM paradas_bus
 `
 
-func (q *Queries) ListarMenuDiariosPorAlimentacion(ctx context.Context, alimentacionID int64) ([]MenuDiario, error) {
-	rows, err := q.db.QueryContext(ctx, listarMenuDiariosPorAlimentacion, alimentacionID)
+// PARADAS BUS--
+func (q *Queries) ListarParadas(ctx context.Context) ([]ParadasBus, error) {
+	rows, err := q.db.QueryContext(ctx, listarParadas)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []MenuDiario
+	var items []ParadasBus
 	for rows.Next() {
-		var i MenuDiario
-		if err := rows.Scan(&i.ID, &i.Fecha, &i.AlimentacionID); err != nil {
+		var i ParadasBus
+		if err := rows.Scan(
+			&i.ID,
+			&i.NombreParada,
+			&i.Direccion,
+			&i.Descripcion,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -832,41 +1320,6 @@ SELECT id, nombre_plato, descripcion, categoria, precio, menu_diario_id FROM pla
 // PLATOS --
 func (q *Queries) ListarPlatos(ctx context.Context) ([]Plato, error) {
 	rows, err := q.db.QueryContext(ctx, listarPlatos)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Plato
-	for rows.Next() {
-		var i Plato
-		if err := rows.Scan(
-			&i.ID,
-			&i.NombrePlato,
-			&i.Descripcion,
-			&i.Categoria,
-			&i.Precio,
-			&i.MenuDiarioID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listarPlatosPorMenuDiario = `-- name: ListarPlatosPorMenuDiario :many
-SELECT id, nombre_plato, descripcion, categoria, precio, menu_diario_id FROM plato
-WHERE menu_diario_id = ?
-`
-
-func (q *Queries) ListarPlatosPorMenuDiario(ctx context.Context, menuDiarioID int64) ([]Plato, error) {
-	rows, err := q.db.QueryContext(ctx, listarPlatosPorMenuDiario, menuDiarioID)
 	if err != nil {
 		return nil, err
 	}
@@ -929,42 +1382,9 @@ func (q *Queries) ListarResenas(ctx context.Context) ([]Resena, error) {
 	return items, nil
 }
 
-const listarResenasPorAlimentacion = `-- name: ListarResenasPorAlimentacion :many
-SELECT id, comentario, calificacion, alimentacion_id FROM resena
-WHERE alimentacion_id = ?
-`
-
-func (q *Queries) ListarResenasPorAlimentacion(ctx context.Context, alimentacionID int64) ([]Resena, error) {
-	rows, err := q.db.QueryContext(ctx, listarResenasPorAlimentacion, alimentacionID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Resena
-	for rows.Next() {
-		var i Resena
-		if err := rows.Scan(
-			&i.ID,
-			&i.Comentario,
-			&i.Calificacion,
-			&i.AlimentacionID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listarRutas = `-- name: ListarRutas :many
 
-SELECT id, nombre_linea, frecuencia_aprox, precio, descripcion_ruta, cooperativa_id, sector_origen_id, sector_destino_id, provider_id FROM ruta_transporte
+SELECT id, nombre_linea, frecuencia_aprox, precio, descripcion_ruta, cooperativa_id, sector_origen_id, sector_destino_id, parada_bus_id FROM ruta_transporte
 `
 
 // RUTAS DE TRANSPORTE --
@@ -986,8 +1406,37 @@ func (q *Queries) ListarRutas(ctx context.Context) ([]RutaTransporte, error) {
 			&i.CooperativaID,
 			&i.SectorOrigenID,
 			&i.SectorDestinoID,
-			&i.ProviderID,
+			&i.ParadaBusID,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listarSectores = `-- name: ListarSectores :many
+
+SELECT sector_id, nombre FROM sector
+`
+
+// SECTORES --
+func (q *Queries) ListarSectores(ctx context.Context) ([]Sector, error) {
+	rows, err := q.db.QueryContext(ctx, listarSectores)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Sector
+	for rows.Next() {
+		var i Sector
+		if err := rows.Scan(&i.SectorID, &i.Nombre); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -1051,179 +1500,4 @@ func (q *Queries) ListarViviendas(ctx context.Context) ([]Vivienda, error) {
 		return nil, err
 	}
 	return items, nil
-}
-
-const obtenerAlimentacion = `-- name: ObtenerAlimentacion :one
-SELECT id, nombre_local, descripcion, ubicacion, direccion, horario_apertura, horario_cierre, telefono, tipo_comida, precio_promedio, provider_id FROM alimentacion
-WHERE id = ?
-`
-
-func (q *Queries) ObtenerAlimentacion(ctx context.Context, id int64) (Alimentacion, error) {
-	row := q.db.QueryRowContext(ctx, obtenerAlimentacion, id)
-	var i Alimentacion
-	err := row.Scan(
-		&i.ID,
-		&i.NombreLocal,
-		&i.Descripcion,
-		&i.Ubicacion,
-		&i.Direccion,
-		&i.HorarioApertura,
-		&i.HorarioCierre,
-		&i.Telefono,
-		&i.TipoComida,
-		&i.PrecioPromedio,
-		&i.ProviderID,
-	)
-	return i, err
-}
-
-const obtenerAplicarVivienda = `-- name: ObtenerAplicarVivienda :one
-SELECT aplicar_vivienda_id, estudiante_id, vivienda_id, estado FROM aplicar_vivienda
-WHERE aplicar_vivienda_id = ?
-`
-
-func (q *Queries) ObtenerAplicarVivienda(ctx context.Context, aplicarViviendaID int64) (AplicarVivienda, error) {
-	row := q.db.QueryRowContext(ctx, obtenerAplicarVivienda, aplicarViviendaID)
-	var i AplicarVivienda
-	err := row.Scan(
-		&i.AplicarViviendaID,
-		&i.EstudianteID,
-		&i.ViviendaID,
-		&i.Estado,
-	)
-	return i, err
-}
-
-const obtenerCooperativa = `-- name: ObtenerCooperativa :one
-SELECT id, nombre, telefono, descripcion FROM cooperativa
-WHERE id = ?
-`
-
-func (q *Queries) ObtenerCooperativa(ctx context.Context, id int64) (Cooperativa, error) {
-	row := q.db.QueryRowContext(ctx, obtenerCooperativa, id)
-	var i Cooperativa
-	err := row.Scan(
-		&i.ID,
-		&i.Nombre,
-		&i.Telefono,
-		&i.Descripcion,
-	)
-	return i, err
-}
-
-const obtenerFoto = `-- name: ObtenerFoto :one
-SELECT foto_id, url, vivienda_id FROM foto
-WHERE foto_id = ?
-`
-
-func (q *Queries) ObtenerFoto(ctx context.Context, fotoID int64) (Foto, error) {
-	row := q.db.QueryRowContext(ctx, obtenerFoto, fotoID)
-	var i Foto
-	err := row.Scan(&i.FotoID, &i.Url, &i.ViviendaID)
-	return i, err
-}
-
-const obtenerMenuDiario = `-- name: ObtenerMenuDiario :one
-SELECT id, fecha, alimentacion_id FROM menu_diario
-WHERE id = ?
-`
-
-func (q *Queries) ObtenerMenuDiario(ctx context.Context, id int64) (MenuDiario, error) {
-	row := q.db.QueryRowContext(ctx, obtenerMenuDiario, id)
-	var i MenuDiario
-	err := row.Scan(&i.ID, &i.Fecha, &i.AlimentacionID)
-	return i, err
-}
-
-const obtenerPlato = `-- name: ObtenerPlato :one
-SELECT id, nombre_plato, descripcion, categoria, precio, menu_diario_id FROM plato
-WHERE id = ?
-`
-
-func (q *Queries) ObtenerPlato(ctx context.Context, id int64) (Plato, error) {
-	row := q.db.QueryRowContext(ctx, obtenerPlato, id)
-	var i Plato
-	err := row.Scan(
-		&i.ID,
-		&i.NombrePlato,
-		&i.Descripcion,
-		&i.Categoria,
-		&i.Precio,
-		&i.MenuDiarioID,
-	)
-	return i, err
-}
-
-const obtenerResena = `-- name: ObtenerResena :one
-SELECT id, comentario, calificacion, alimentacion_id FROM resena
-WHERE id = ?
-`
-
-func (q *Queries) ObtenerResena(ctx context.Context, id int64) (Resena, error) {
-	row := q.db.QueryRowContext(ctx, obtenerResena, id)
-	var i Resena
-	err := row.Scan(
-		&i.ID,
-		&i.Comentario,
-		&i.Calificacion,
-		&i.AlimentacionID,
-	)
-	return i, err
-}
-
-const obtenerRuta = `-- name: ObtenerRuta :one
-SELECT id, nombre_linea, frecuencia_aprox, precio, descripcion_ruta, cooperativa_id, sector_origen_id, sector_destino_id, provider_id FROM ruta_transporte
-WHERE id = ?
-`
-
-func (q *Queries) ObtenerRuta(ctx context.Context, id int64) (RutaTransporte, error) {
-	row := q.db.QueryRowContext(ctx, obtenerRuta, id)
-	var i RutaTransporte
-	err := row.Scan(
-		&i.ID,
-		&i.NombreLinea,
-		&i.FrecuenciaAprox,
-		&i.Precio,
-		&i.DescripcionRuta,
-		&i.CooperativaID,
-		&i.SectorOrigenID,
-		&i.SectorDestinoID,
-		&i.ProviderID,
-	)
-	return i, err
-}
-
-const obtenerVivienda = `-- name: ObtenerVivienda :one
-SELECT vivienda_id, titulo, tipo_vivienda, precio, garantia, precio_garantia, direccion, luz, agua, amueblado, internet, bano_privado, numero_habitaciones, mascotas, genero_preferido, reglas_convivencia, telefono, email, estado, comentario, sector_id, proveedor_id FROM vivienda
-WHERE vivienda_id = ?
-`
-
-func (q *Queries) ObtenerVivienda(ctx context.Context, viviendaID int64) (Vivienda, error) {
-	row := q.db.QueryRowContext(ctx, obtenerVivienda, viviendaID)
-	var i Vivienda
-	err := row.Scan(
-		&i.ViviendaID,
-		&i.Titulo,
-		&i.TipoVivienda,
-		&i.Precio,
-		&i.Garantia,
-		&i.PrecioGarantia,
-		&i.Direccion,
-		&i.Luz,
-		&i.Agua,
-		&i.Amueblado,
-		&i.Internet,
-		&i.BanoPrivado,
-		&i.NumeroHabitaciones,
-		&i.Mascotas,
-		&i.GeneroPreferido,
-		&i.ReglasConvivencia,
-		&i.Telefono,
-		&i.Email,
-		&i.Estado,
-		&i.Comentario,
-		&i.SectorID,
-		&i.ProveedorID,
-	)
-	return i, err
 }

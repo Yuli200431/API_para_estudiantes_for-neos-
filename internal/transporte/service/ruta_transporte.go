@@ -10,8 +10,8 @@ type RutaTransporteService struct {
 	repo storage.RutaTransporteRepository
 }
 
-func NuevaRutaService(repo storage.RutaTransporteRepository) *RutaTransporteService{
-	return &RutaTransporteService{repo:repo}
+func NuevaRutaService(repo storage.RutaTransporteRepository) *RutaTransporteService {
+	return &RutaTransporteService{repo: repo}
 }
 
 func (s *RutaTransporteService) ListarRuta() []models.RutaTransporte {
@@ -19,7 +19,7 @@ func (s *RutaTransporteService) ListarRuta() []models.RutaTransporte {
 }
 
 func (s *RutaTransporteService) ObtenerRutas(id int) (models.RutaTransporte, error) {
-	a, ok := s.repo.ObtenerRutaPorID(uint(id))
+	a, ok := s.repo.BuscarRutaPorID(uint(id))
 	if !ok {
 		return models.RutaTransporte{}, ErrNoEncontrado
 	}
@@ -30,7 +30,7 @@ func (s *RutaTransporteService) CrearRuta(a models.RutaTransporte) (models.RutaT
 	if err := validacionRutaTransporte(a); err != nil {
 		return models.RutaTransporte{}, err
 	}
-	return s.repo.AgregarRuta(a), nil
+	return s.repo.CrearRuta(a), nil
 }
 
 func (s *RutaTransporteService) ActualizarRuta(id int, a models.RutaTransporte) (models.RutaTransporte, error) {
@@ -45,7 +45,7 @@ func (s *RutaTransporteService) ActualizarRuta(id int, a models.RutaTransporte) 
 }
 
 func (s *RutaTransporteService) BorrarRuta(id int) error {
-	if !s.repo.EliminarRuta(uint(id)) {
+	if !s.repo.BorrarRuta(uint(id)) {
 		return ErrNoEncontrado
 	}
 	return nil

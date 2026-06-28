@@ -1,56 +1,35 @@
 package storage
 
 import (
-	"errors"
+	"time"
+
+	"gorm.io/gorm"
 
 	"for-neos-api/internal/usuario/models"
 )
 
-type UsuarioStorage struct {
-	usuarios []models.Usuario
-
-	nextID int
+type UsuarioGORM struct {
+	db *gorm.DB
 }
 
-func NewUsuarioStorage() *UsuarioStorage {
+func NewUsuarioGORM(db *gorm.DB) *UsuarioGORM {
+	return &UsuarioGORM{db: db}
+}
 
-	return &UsuarioStorage{
-		usuarios: []models.Usuario{},
-
-		nextID: 1,
+func (r *UsuarioGORM) CrearUsuario(u models.Usuario) (models.Usuario, error) {
+	u.CreadoEn = time.Now()
+	if err := r.db.Create(&u).Error; err != nil {
+		return models.Usuario{}, err
 	}
-}
-
-func (s *UsuarioStorage) CrearUsuario(u models.Usuario) (models.Usuario, error) {
-
-	u.ID =
-		s.nextID
-
-	s.nextID++
-
-	s.usuarios =
-		append(
-			s.usuarios,
-			u,
-		)
-
 	return u, nil
 }
 
-func (s *UsuarioStorage) BuscarUsuarioPorEmail(email string) (models.Usuario, bool) {
-
-	for _, u := range s.usuarios {
-
-		if u.Email ==
-			email {
-
-			return u,
-				true
-		}
+func (r *UsuarioGORM) BuscarUsuarioPorEmail(email string) (models.Usuario, bool) {
+	var u models.Usuario
+	if err := r.db.Where("email = ?", email).First(&u).Error; err != nil {
+		return models.Usuario{}, false
 	}
-
-	return models.Usuario{},
-		false
+	return u, true
 }
 
-var _ = errors.New
+var _UserRepository = (*UsuarioGORM)(nil)

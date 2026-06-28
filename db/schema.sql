@@ -57,10 +57,17 @@ CREATE TABLE ruta_transporte (
     cooperativa_id INTEGER NOT NULL,
     sector_origen_id INTEGER NOT NULL,
     sector_destino_id INTEGER NOT NULL,
-    provider_id INTEGER NOT NULL,
+    parada_bus_id INTEGER NOT NULL,
     FOREIGN KEY (cooperativa_id) REFERENCES cooperativa(id),
     FOREIGN KEY (sector_origen_id) REFERENCES sector(id),
     FOREIGN KEY (sector_destino_id) REFERENCES sector(id)
+);
+
+CREATE TABLE paradas_bus (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre_parada TEXT NOT NULL,
+    direccion TEXT NOT NULL,
+    descripcion TEXT NOT NULL
 );
 
 -- vivienda --
@@ -70,16 +77,16 @@ CREATE TABLE vivienda (
     titulo TEXT NOT NULL,
     tipo_vivienda TEXT NOT NULL,
     precio REAL NOT NULL,
-    garantia INTEGER,
+    garantia BOOLEAN NOT NULL,
     precio_garantia REAL NOT NULL,
     direccion TEXT NOT NULL,
-    luz INTEGER,
-    agua INTEGER,
-    amueblado INTEGER,
-    internet INTEGER,
-    bano_privado INTEGER,
+    luz BOOLEAN NOT NULL,
+    agua BOOLEAN NOT NULL,
+    amueblado BOOLEAN NOT NULL,
+    internet BOOLEAN NOT NULL,
+    bano_privado BOOLEAN NOT NULL,
     numero_habitaciones INTEGER NOT NULL,
-    mascotas INTEGER,
+    mascotas BOOLEAN NOT NULL,
     genero_preferido TEXT NOT NULL,
     reglas_convivencia TEXT NOT NULL,
     telefono TEXT NOT NULL,

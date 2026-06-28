@@ -4,10 +4,6 @@
 
 package sqlcdb
 
-import (
-	"database/sql"
-)
-
 type Alimentacion struct {
 	ID              int64
 	NombreLocal     string
@@ -48,6 +44,13 @@ type MenuDiario struct {
 	AlimentacionID int64
 }
 
+type ParadasBus struct {
+	ID           int64
+	NombreParada string
+	Direccion    string
+	Descripcion  string
+}
+
 type Plato struct {
 	ID           int64
 	NombrePlato  string
@@ -73,7 +76,7 @@ type RutaTransporte struct {
 	CooperativaID   int64
 	SectorOrigenID  int64
 	SectorDestinoID int64
-	ProviderID      int64
+	ParadaBusID     int64
 }
 
 type Sector struct {
@@ -86,16 +89,16 @@ type Vivienda struct {
 	Titulo             string
 	TipoVivienda       string
 	Precio             float64
-	Garantia           sql.NullInt64
+	Garantia           bool
 	PrecioGarantia     float64
 	Direccion          string
-	Luz                sql.NullInt64
-	Agua               sql.NullInt64
-	Amueblado          sql.NullInt64
-	Internet           sql.NullInt64
-	BanoPrivado        sql.NullInt64
+	Luz                bool
+	Agua               bool
+	Amueblado          bool
+	Internet           bool
+	BanoPrivado        bool
 	NumeroHabitaciones int64
-	Mascotas           sql.NullInt64
+	Mascotas           bool
 	GeneroPreferido    string
 	ReglasConvivencia  string
 	Telefono           string
