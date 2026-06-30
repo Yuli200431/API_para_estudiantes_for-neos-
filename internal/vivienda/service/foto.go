@@ -55,5 +55,8 @@ func validacionFoto(f models.Foto) error {
 	if strings.TrimSpace(f.URL) == "" {
 		return ErrURLVacio
 	}
+	if f.ViviendaID == 0 {
+		return ErrNoEncontrado
+	}
 	return nil
 }
