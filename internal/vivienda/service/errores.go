@@ -9,7 +9,7 @@ var (
 	ErrTituloVacio           = errors.New("El campo Titulo no puede estar vacío")
 	ErrEstadoVacio           = errors.New("El campo Estado no puede estar vacío")
 	ErrURLVacio              = errors.New("El campo URL no puede estar vacío")
-	ErrNoEncontrado          = errors.New("No se encontró el producto")
+	ErrNoEncontrado          = errors.New("No se encontró la vivienda")
 	ErrEmailEnUso            = errors.New("El campo Email ya está en uso")
 	ErrCredencialesInvalidas = errors.New("Email o contraseña no son válidos")
 )
