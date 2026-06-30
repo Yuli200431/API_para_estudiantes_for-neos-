@@ -1,8 +1,8 @@
 package models
 
 type Alimentacion struct {
-	ID              int     `json:"id"`
-	NombreLocal     string  `json:"nombre_local"`
+	ID              int     `json:"id" gorm:"primaryKey"`
+	NombreLocal     string  `json:"nombre_local" gorm:"not null"`
 	Descripcion     string  `json:"descripcion"`
 	Ubicacion       string  `json:"ubicacion"`
 	Direccion       string  `json:"direccion"`
