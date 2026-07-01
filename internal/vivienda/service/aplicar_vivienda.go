@@ -55,5 +55,8 @@ func validacionAplicarVivienda(a models.AplicarVivienda) error {
 	if strings.TrimSpace(a.Estado) == "" {
 		return ErrEstadoVacio
 	}
+	if a.ViviendaID == 0 {
+		return ErrNoEncontrado
+	}
 	return nil
 }
