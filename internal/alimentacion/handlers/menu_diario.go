@@ -3,10 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"for-neos-api/internal/alimentacion/models"
-	"github.com/go-chi/chi/v5"
 )
 
 func (s *Server) ListarMenuDiarios(w http.ResponseWriter, _ *http.Request) {
@@ -14,7 +12,7 @@ func (s *Server) ListarMenuDiarios(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *Server) BuscarMenuDiarioPorID(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "ID inválido")
 		return
@@ -42,7 +40,7 @@ func (s *Server) CrearMenuDiario(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ActualizarMenuDiario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "ID inválido")
 		return
@@ -61,7 +59,7 @@ func (s *Server) ActualizarMenuDiario(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) BorrarMenuDiario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "ID inválido")
 		return

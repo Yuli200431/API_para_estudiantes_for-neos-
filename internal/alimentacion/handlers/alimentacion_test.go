@@ -112,7 +112,11 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 	usuarios := nuevoUsuarioRepoFake()
 	authSvc := usuarioService.NuevoAuthService(usuarios)
 
-	srv := handlers.NewServer(alimentacionSvc, nil, nil, nil)
+	srv := handlers.NewServer(
+		handlers.Deps{
+			Alimentacion: alimentacionSvc,
+		},
+	)
 
 	r := chi.NewRouter()
 	r.Route("/api/v1", func(r chi.Router) {

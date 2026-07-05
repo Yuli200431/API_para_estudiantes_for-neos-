@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
@@ -46,29 +47,54 @@ func run(cfg config.Config) error {
 	log.Printf("Backend de almacenamiento: %s", recursos.BackendUsado)
 
 	// 2. Servicios.
-	auth := usuarioService.NuevoAuthService(recursos.Usuarios)
-	authServer := usuarioHandlers.NewServer(auth)
+	auth := usuarioService.NuevoAuthService(
+		recursos.Usuarios,
+		usuarioService.WithSecreto(cfg.JWTSecreto),
+		usuarioService.WithDuracionToken(cfg.JWTDuracion),
+	)
+	authServer := usuarioHandlers.NewServer(
+		usuarioHandlers.Deps{
+			Auth: auth,
+		},
+	)
 
 	// Vivienda
 	viviendaSrv := viviendaService.NuevaViviendaService(recursos.Almacen)
 	fotoSrv := viviendaService.NuevaFotoService(recursos.Almacen)
 	aplicarSrv := viviendaService.NuevaAplicarViviendaService(recursos.Almacen)
 	sectorSrv := viviendaService.NuevaSectorService(recursos.Almacen)
-	servidorVivienda := viviendaHandlers.NewServer(viviendaSrv, fotoSrv, aplicarSrv, sectorSrv)
-
+	servidorVivienda := viviendaHandlers.NewServer(
+		viviendaHandlers.Deps{
+			Viviendas: viviendaSrv,
+			Fotos:     fotoSrv,
+			Aplicar:   aplicarSrv,
+			Sectores:  sectorSrv,
+		},
+	)
 	// Transporte
 	cooperativaSrv := transporteService.NuevaCooperaticaService(recursos.Almacen)
 	paradaBusSrv := transporteService.NuevaParadaBusService(recursos.Almacen)
 	rutaTransporteSrv := transporteService.NuevaRutaService(recursos.Almacen)
-	transporteServidor := transporteHandlers.NewServer(cooperativaSrv, paradaBusSrv, rutaTransporteSrv)
-
+	transporteServidor := transporteHandlers.NewServer(
+		transporteHandlers.Deps{
+			Cooperativas: cooperativaSrv,
+			Paradas:      paradaBusSrv,
+			Rutas:        rutaTransporteSrv,
+		},
+	)
 	// Alimentacion
 	alimentacionSrv := alimentacionService.NuevaAlimentacionService(recursos.Almacen)
 	menuDiarioSrv := alimentacionService.NuevoMenuDiarioService(recursos.Almacen)
 	platoSrv := alimentacionService.NuevoPlatoService(recursos.Almacen)
 	resenaSrv := alimentacionService.NuevaResenaService(recursos.Almacen)
-	servidorAlimentacion := alimentacionHandlers.NewServer(alimentacionSrv, menuDiarioSrv, platoSrv, resenaSrv)
-
+	servidorAlimentacion := alimentacionHandlers.NewServer(
+		alimentacionHandlers.Deps{
+			Alimentacion: alimentacionSrv,
+			MenuDiario:   menuDiarioSrv,
+			Plato:        platoSrv,
+			Resena:       resenaSrv,
+		},
+	)
 	// 3. Router + middleware.
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
@@ -188,7 +214,7 @@ func run(cfg config.Config) error {
 		log.Println("Senal de apagado recibida, cerrando ordenadamente...")
 	}
 
-	ctxApagado, cancelar := context.WithTimeout(context.Background(), 10*1000000000)
+	ctxApagado, cancelar := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancelar()
 	if err := srv.Shutdown(ctxApagado); err != nil {
 		return err

@@ -4,9 +4,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"for-neos-api/internal/vivienda/models"
 )
@@ -21,7 +18,7 @@ func (s *Server) ListarFotos(w http.ResponseWriter, _ *http.Request) {
 
 // ObtenerFoto atiende GET /api/v1/Fotos/{id}.
 func (s *Server) ObtenerFoto(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return
@@ -54,7 +51,7 @@ func (s *Server) CrearFoto(w http.ResponseWriter, r *http.Request) {
 
 // ActualizarFoto atiende PUT /api/v1/Fotos/{id}.
 func (s *Server) ActualizarFoto(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return
@@ -77,7 +74,7 @@ func (s *Server) ActualizarFoto(w http.ResponseWriter, r *http.Request) {
 
 // BorrarFoto atiende DELETE /api/v1/Fotos/{id}.
 func (s *Server) BorrarFoto(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return

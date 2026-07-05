@@ -11,16 +11,18 @@ type Server struct {
 	Resena       *service.ResenaService
 }
 
-func NewServer(
-	alimentacion *service.AlimentacionService,
-	menuDiario *service.MenuDiarioService,
-	plato *service.PlatoService,
-	resena *service.ResenaService,
-) *Server {
+type Deps struct {
+	Alimentacion *service.AlimentacionService
+	MenuDiario   *service.MenuDiarioService
+	Plato        *service.PlatoService
+	Resena       *service.ResenaService
+}
+
+func NewServer(d Deps) *Server {
 	return &Server{
-		Alimentacion: alimentacion,
-		MenuDiario:   menuDiario,
-		Plato:        plato,
-		Resena:       resena,
+		Alimentacion: d.Alimentacion,
+		MenuDiario:   d.MenuDiario,
+		Plato:        d.Plato,
+		Resena:       d.Resena,
 	}
 }

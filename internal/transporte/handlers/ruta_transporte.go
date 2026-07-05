@@ -3,14 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-
-
-	"github.com/go-chi/chi/v5"
 
 	"for-neos-api/internal/transporte/models"
 )
-
 
 // Funcion para listar todas las rutas
 // Recibe la peticion GET /rutas y devuelve un JSON con todas las rutas disponibles
@@ -24,7 +19,7 @@ func (s *Server) ListarRutas(w http.ResponseWriter, _ *http.Request) {
 // Recibe la peticion GET /rutas/:id y devuelve un JSON con la ruta correspondiente al ID proporcionado
 // ObtenerRutaPorID atiende GET /api/v1/transporte/{id}.
 func (s *Server) ObtenerRutaPorID(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return
@@ -63,7 +58,7 @@ func (s *Server) AgregarRuta(w http.ResponseWriter, r *http.Request) {
 // los datos actualizados de la ruta, y devuelve un JSON con la ruta actualizada
 // Atiende PUT /api/v1/transporte/{id}.
 func (s *Server) ActualizarRuta(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return
@@ -90,7 +85,7 @@ func (s *Server) ActualizarRuta(w http.ResponseWriter, r *http.Request) {
 // devolviendo un mensaje de éxito o error
 // Atiende DELETE /api/v1/transporte/{id}.
 func (s *Server) EliminarRuta(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return

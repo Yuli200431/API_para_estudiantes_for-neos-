@@ -8,8 +8,12 @@ type Server struct {
 	Auth *service.AuthService
 }
 
-func NewServer(a *service.AuthService) *Server {
+type Deps struct {
+	Auth *service.AuthService
+}
+
+func NewServer(d Deps) *Server {
 	return &Server{
-		Auth: a,
+		Auth: d.Auth,
 	}
 }
