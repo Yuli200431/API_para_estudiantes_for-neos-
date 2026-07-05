@@ -184,4 +184,4 @@ func TestRutaProtegida_SinToken(t *testing.T) {
 	h.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
-}
+} 
