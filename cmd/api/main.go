@@ -39,7 +39,7 @@ func main() {
 
 func run(cfg config.Config) error {
 	// 1. Factory: abre DB, migra, siembra y elige backend.
-	recursos, err := storage.Inicializar(cfg.RutaDB, cfg.Backend)
+	recursos, err := storage.Inicializar(cfg.RutaDB, cfg.Backend, cfg.DBDriver, cfg.DBDsn)
 	if err != nil {
 		return err
 	}
