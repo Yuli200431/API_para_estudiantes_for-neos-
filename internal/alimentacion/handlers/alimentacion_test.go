@@ -112,7 +112,11 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 	usuarios := nuevoUsuarioRepoFake()
 	authSvc := usuarioService.NuevoAuthService(usuarios)
 
-	srv := handlers.NewServer(alimentacionSvc, nil, nil, nil)
+	srv := handlers.NewServer(
+		handlers.Deps{
+			Alimentacion: alimentacionSvc,
+		},
+	)
 
 	r := chi.NewRouter()
 	r.Route("/api/v1", func(r chi.Router) {
@@ -184,4 +188,8 @@ func TestRutaProtegida_SinToken(t *testing.T) {
 	h.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+<<<<<<< HEAD
 } 
+=======
+}
+>>>>>>> 8b8524396be18ceb2a7959922150c99338c32fc6

@@ -11,10 +11,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var secretoJWT = []byte("palabra_bastante_secreta")
-
-// El tiempo que queremos que duren el Token
-var duracionToken = time.Hour * 24
+const (
+	secretoPorDefecto  = "cafeteria-uleam-secreto-solo-dev"
+	duracionPorDefecto = 24 * time.Hour
+)
 
 // Claims: Todo lo que quiero que este Token contenga, la información que yo quiero que este en este Token
 type Claims struct {
@@ -23,12 +23,43 @@ type Claims struct {
 }
 
 type AuthService struct {
-	repo storage.UserRepository
+	repo     storage.UserRepository
+	secreto  []byte
+	duracion time.Duration
 }
 
-func NuevoAuthService(repo storage.UserRepository) *AuthService {
-	return &AuthService{repo: repo}
+// AuthOption configura un AuthService en su construccion (patron Options).
+type AuthOption func(*AuthService)
 
+// WithSecreto inyecta la clave de firma del JWT (desde config/.env en produccion).
+// Si recibe un secreto vacio, conserva el valor por defecto.
+func WithSecreto(secreto []byte) AuthOption {
+	return func(a *AuthService) {
+		if len(secreto) > 0 {
+			a.secreto = secreto
+		}
+	}
+}
+
+// WithDuracionToken inyecta la validez del token. Si recibe <= 0, conserva el default.
+func WithDuracionToken(d time.Duration) AuthOption {
+	return func(a *AuthService) {
+		if d > 0 {
+			a.duracion = d
+		}
+	}
+}
+
+func NuevoAuthService(repo storage.UserRepository, opts ...AuthOption) *AuthService {
+	s := &AuthService{
+		repo:     repo,
+		secreto:  []byte(secretoPorDefecto),
+		duracion: duracionPorDefecto,
+	}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
 }
 func (s *AuthService) Registrar(nombre, email, password string) (models.Usuario, error) {
 	nombre = strings.TrimSpace(nombre)
@@ -79,15 +110,14 @@ func (s *AuthService) generarToken(u models.Usuario) (string, error) {
 		UsuarioID: u.ID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			//Hasta cuando el token va hacer valido
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duracionToken)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.duracion)),
 			//Que se va a usar para identificar al token
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 		},
 	}
 	// Creamos el token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(secretoJWT)
-
+	return token.SignedString(s.secreto)
 }
 
 func (s *AuthService) ValidarToken(tokenStr string) (int, error) {
@@ -95,7 +125,7 @@ func (s *AuthService) ValidarToken(tokenStr string) (int, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrCredencialesInvalidas
 		}
-		return secretoJWT, nil
+		return s.secreto, nil
 	})
 	if err != nil || !token.Valid {
 		return 0, ErrCredencialesInvalidas

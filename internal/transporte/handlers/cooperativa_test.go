@@ -101,7 +101,11 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 
 	repo := nuevoFakeRepo()
 	svc := service.NuevaCooperaticaService(repo)
-	srv := handlers.NewServer(svc, nil, nil)
+	srv := handlers.NewServer(
+		handlers.Deps{
+			Cooperativas: svc,
+		},
+	)
 
 	usuarios := nuevoFakeUsuarioRepo()
 	authSvc := usuarioService.NuevoAuthService(usuarios)

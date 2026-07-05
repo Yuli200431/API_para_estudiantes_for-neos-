@@ -93,11 +93,19 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 
 	viviendaSrv := viviendaService.NuevaViviendaService(repo)
 
-	servidor := viviendaHandlers.NewServer(viviendaSrv, nil, nil, nil)
+	servidor := viviendaHandlers.NewServer(
+		viviendaHandlers.Deps{
+			Viviendas: viviendaSrv,
+		},
+	)
 
 	usuarios := nuevoUsuarioRepoFake()
 	auth := usuarioService.NuevoAuthService(usuarios)
-	authServer := usuarioHandlers.NewServer(auth)
+	authServer := usuarioHandlers.NewServer(
+		usuarioHandlers.Deps{
+			Auth: auth,
+		},
+	)
 
 	r := chi.NewRouter()
 
