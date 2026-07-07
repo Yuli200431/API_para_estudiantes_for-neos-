@@ -8,4 +8,5 @@ type Usuario struct {
 	Email        string    `json:"email" gorm:"not full;uniqueIndex"`
 	PasswordHash string    `json:"-" gorm:"not full"`
 	CreadoEn     time.Time `json:"creado_en"`
+	Rol          string    `gorm:"default:estudiante"`
 }

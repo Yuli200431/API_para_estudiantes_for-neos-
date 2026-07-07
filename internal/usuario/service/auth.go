@@ -18,7 +18,8 @@ const (
 
 // Claims: Todo lo que quiero que este Token contenga, la información que yo quiero que este en este Token
 type Claims struct {
-	UsuarioID int `json:"uid"`
+	UsuarioID int    `json:"uid"`
+	Rol       string `json:"rol"`
 	jwt.RegisteredClaims
 }
 
@@ -83,6 +84,7 @@ func (s *AuthService) Registrar(nombre, email, password string) (models.Usuario,
 			Nombre:       nombre,
 			Email:        email,
 			PasswordHash: string(hash),
+			Rol:          "estudiante",
 		})
 }
 
@@ -108,6 +110,7 @@ func (s *AuthService) generarToken(u models.Usuario) (string, error) {
 	claims := Claims{
 		//Datos del usuario, los que queramos.
 		UsuarioID: u.ID,
+		Rol:       u.Rol,
 		RegisteredClaims: jwt.RegisteredClaims{
 			//Hasta cuando el token va hacer valido
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.duracion)),
@@ -120,7 +123,7 @@ func (s *AuthService) generarToken(u models.Usuario) (string, error) {
 	return token.SignedString(s.secreto)
 }
 
-func (s *AuthService) ValidarToken(tokenStr string) (int, error) {
+func (s *AuthService) ValidarToken(tokenStr string) (int, string, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrCredencialesInvalidas
@@ -128,11 +131,11 @@ func (s *AuthService) ValidarToken(tokenStr string) (int, error) {
 		return s.secreto, nil
 	})
 	if err != nil || !token.Valid {
-		return 0, ErrCredencialesInvalidas
+		return 0, "", ErrCredencialesInvalidas
 	}
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return 0, ErrCredencialesInvalidas
+		return 0, "", ErrCredencialesInvalidas
 	}
-	return claims.UsuarioID, nil
+	return claims.UsuarioID, claims.Rol, nil
 }

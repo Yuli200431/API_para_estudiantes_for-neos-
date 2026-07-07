@@ -11,6 +11,7 @@ import (
 type claveContexto string
 
 const claveUsuarioID claveContexto = "usuarioID"
+const claveRol claveContexto = "rol"
 
 func Auth(auth *service.AuthService) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
@@ -21,12 +22,15 @@ func Auth(auth *service.AuthService) func(http.Handler) http.Handler {
 				responderNoAutorizado(w)
 				return
 			}
-			usuarioID, err := auth.ValidarToken(partes[1])
+			usuarioID, rol, err := auth.ValidarToken(partes[1])
 			if err != nil {
 				responderNoAutorizado(w)
 				return
 			}
+
 			ctx := context.WithValue(r.Context(), claveUsuarioID, usuarioID)
+			ctx = context.WithValue(ctx, claveRol, rol)
+
 			h.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
