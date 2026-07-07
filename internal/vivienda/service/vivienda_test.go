@@ -61,26 +61,83 @@ var _ storage.ViviendaRepository = (*mockViviendaRepo)(nil)
 // Primer Test
 // Sirve para probar el metodo de crear
 func TestViviendaService_Crear(t *testing.T) {
+
+	luz := true
+	agua := true
+	amueblado := true
+	internet := true
+	bañoPrivado := true
+	mascotas := true
+	garantia := true
+
 	//Casos de prueba.
+	//Casos de prueba.
+	viviendaValida := models.Vivienda{
+		Titulo:             "titulo",
+		TipoVivienda:       "casa",
+		Precio:             100,
+		Garantia:           &garantia,
+		PrecioGarantia:     50,
+		Luz:                &luz,
+		Agua:               &agua,
+		Amueblado:          &amueblado,
+		Internet:           &internet,
+		BañoPrivado:        &bañoPrivado,
+		NumeroHabitaciones: 2,
+		Mascotas:           &mascotas,
+		GeneroPreferido:    "cualquiera",
+		ReglasConvivencia:  "reglas",
+		Telefono:           "0999999999",
+		Email:              "correo@test.com",
+		Estado:             "Disponible",
+		Comentario:         "comentario",
+		ViviendaID:         1,
+		SectorID:           1,
+		ProveedorID:        1,
+		Fotos: []models.Foto{
+			{FotoID: 1},
+		},
+	}
+
 	casos := []struct {
 		nombre        string
 		entrada       models.Vivienda
 		errEsperado   error
 		debePersistir bool
 	}{
-		//En caso de que no exista el titulo, se muestra un error y no se guarda en el repositorio.
 		{
-			nombre:        "titulo vacio",
-			entrada:       models.Vivienda{Titulo: "   "},
+			nombre:        "vivienda valida",
+			entrada:       viviendaValida,
+			errEsperado:   nil,
+			debePersistir: true,
+		},
+		{
+			nombre: "titulo vacio",
+			entrada: models.Vivienda{
+				Titulo: "",
+			},
 			errEsperado:   service.ErrTituloVacio,
 			debePersistir: false,
 		},
-		//En caso de que el titulo este bien, no se muestra ningún error y se guarda en el repositorio.
 		{
-			nombre:        "titulo valida",
-			entrada:       models.Vivienda{Titulo: "titulo", ViviendaID: 1},
-			errEsperado:   nil,
-			debePersistir: true,
+			nombre: "precio vacio",
+			entrada: func() models.Vivienda {
+				v := viviendaValida
+				v.Precio = 0
+				return v
+			}(),
+			errEsperado:   service.ErrPrecioVacio,
+			debePersistir: false,
+		},
+		{
+			nombre: "sector no encontrado",
+			entrada: func() models.Vivienda {
+				v := viviendaValida
+				v.SectorID = 0
+				return v
+			}(),
+			errEsperado:   service.ErrNoEncontrado,
+			debePersistir: false,
 		},
 	}
 

@@ -178,15 +178,14 @@ func registrarYObtenerToken(t *testing.T, h http.Handler) string {
 // TestCrearVivienda_Exitoso: POST con token y cuerpo valido -> 201 Created.
 func TestCrearVivienda_Exitoso(t *testing.T) {
 	h, token := construirEntorno(t)
-	body := `{"titulo":"Casa Esquinera"}`
-
+	body := `{"titulo":"Casa Esquinera", "tipo_vivienda":"Casa", "precio":100, "garantia":true, "precio_garantia":50, "luz":true, "agua":true, "amueblado":true, "internet":true, "baño_privado":true, "numero_habitaciones":2, "mascotas":true, "genero_preferido":"Cualquiera", "reglas_convivencia":"Reglas", "telefono":"0999999999", "email":"correo@test.com", "estado":"Disponible", "comentario":"Comentario", "sector_id":1, "proveedor_id":1, "fotos":[{"foto_id":1}]}`
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/viviendas", strings.NewReader(body))
 	req.Header.Set("Authorization", "Bearer "+token)
 	rec := httptest.NewRecorder()
 
 	h.ServeHTTP(rec, req)
 
-	require.Equal(t, http.StatusCreated, rec.Code)
+	require.Equal(t, http.StatusCreated, rec.Code, rec.Body.String())
 	var creado viviendaModels.Vivienda
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&creado))
 	assert.NotZero(t, creado.ViviendaID)
@@ -209,7 +208,7 @@ func TestObtenerVivienda_NoEncontrado(t *testing.T) {
 // TestCrearVivienda_Invalido: cuerpo que viola la regla de negocio -> 400.
 func TestCrearVivienda_Invalido(t *testing.T) {
 	h, token := construirEntorno(t)
-	body := `{"titulo":"   "}` // nombre vacio
+	body := `{"titulo":"   ", "tipo_vivienda":"Casa", "precio":100, "garantia":true, "precio_garantia":50, "luz":true, "agua":true, "amueblado":true, "internet":true, "baño_privado":true, "numero_habitaciones":2, "mascotas":true, "genero_preferido":"Cualquiera", "reglas_convivencia":"Reglas", "telefono":"0999999999", "email":"correo@test.com", "estado":"Disponible", "comentario":"Comentario", "sector_id":1, "proveedor_id":1, "fotos":[{"foto_id":1}]}`
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/viviendas", strings.NewReader(body))
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -224,7 +223,7 @@ func TestCrearVivienda_Invalido(t *testing.T) {
 // antes de llegar al handler -> 401 Unauthorized.
 func TestRutaProtegida_SinToken(t *testing.T) {
 	h, _ := construirEntorno(t)
-	body := `{"titulo":"Casa Esquinera"}`
+	body := `{"titulo":"Casa Esquinera", "tipo_vivienda":"Casa", "precio":100, "garantia":true, "precio_garantia":50, "luz":true, "agua":true, "amueblado":true, "internet":true, "baño_privado":true, "numero_habitaciones":2, "mascotas":true, "genero_preferido":"Cualquiera", "reglas_convivencia":"Reglas", "telefono":"0999999999", "email":"correo@test.com", "estado":"Disponible", "comentario":"Comentario", "sector_id":1, "proveedor_id":1}`
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/viviendas", strings.NewReader(body))
 	// A proposito: NO seteamos Authorization.
