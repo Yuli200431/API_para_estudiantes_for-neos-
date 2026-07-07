@@ -10,10 +10,16 @@ type Server struct {
 	Rutas        *service.RutaTransporteService
 }
 
-func NewServer(cooperativas *service.CooperativaService, paradas *service.ParadaBusService, rutas *service.RutaTransporteService,) *Server {
+type Deps struct {
+	Cooperativas *service.CooperativaService
+	Paradas      *service.ParadaBusService
+	Rutas        *service.RutaTransporteService
+}
+
+func NewServer(d Deps) *Server {
 	return &Server{
-		Cooperativas: cooperativas,
-		Paradas:      paradas,
-		Rutas:        rutas,
+		Cooperativas: d.Cooperativas,
+		Paradas:      d.Paradas,
+		Rutas:        d.Rutas,
 	}
 }

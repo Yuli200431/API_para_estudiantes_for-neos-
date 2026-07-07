@@ -11,11 +11,19 @@ type Server struct {
 	Sectores  *service.SectorService
 }
 
-func NewServer(viviendas *service.ViviendaService, fotos *service.FotoService, aplicar *service.AplicarViviendaService, sectores *service.SectorService) *Server {
+type Deps struct {
+	Viviendas *service.ViviendaService
+	Fotos     *service.FotoService
+	Aplicar   *service.AplicarViviendaService
+	Sectores  *service.SectorService
+}
+
+func NewServer(d Deps) *Server {
+
 	return &Server{
-		Viviendas: viviendas,
-		Fotos:     fotos,
-		Aplicar:   aplicar,
-		Sectores:  sectores,
+		Viviendas: d.Viviendas,
+		Fotos:     d.Fotos,
+		Aplicar:   d.Aplicar,
+		Sectores:  d.Sectores,
 	}
 }

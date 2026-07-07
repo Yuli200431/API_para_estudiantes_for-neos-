@@ -4,9 +4,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"for-neos-api/internal/vivienda/models"
 )
@@ -21,7 +18,7 @@ func (s *Server) ListarAplicarViviendas(w http.ResponseWriter, _ *http.Request) 
 
 // ObtenerAplicarVivienda atiende GET /api/v1/AplicarViviendas/{id}.
 func (s *Server) ObtenerAplicarVivienda(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return
@@ -54,7 +51,7 @@ func (s *Server) CrearAplicarVivienda(w http.ResponseWriter, r *http.Request) {
 
 // ActualizarAplicarVivienda atiende PUT /api/v1/AplicarViviendas/{id}.
 func (s *Server) ActualizarAplicarVivienda(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return
@@ -77,7 +74,7 @@ func (s *Server) ActualizarAplicarVivienda(w http.ResponseWriter, r *http.Reques
 
 // BorrarAplicarVivienda atiende DELETE /api/v1/AplicarViviendas/{id}.
 func (s *Server) BorrarAplicarVivienda(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return

@@ -4,10 +4,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 
 	"for-neos-api/internal/vivienda/models"
 )
@@ -20,7 +17,7 @@ func (s *Server) ListarSectores(w http.ResponseWriter, _ *http.Request) {
 
 // ObtenerSector atiende GET /api/v1/sectores/{id}.
 func (s *Server) ObtenerSector(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return
@@ -57,7 +54,7 @@ func (s *Server) CrearSector(w http.ResponseWriter, r *http.Request) {
 
 // ActualizarSector atiende PUT /api/v1/sectores/{id}.
 func (s *Server) ActualizarSector(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return
@@ -84,7 +81,7 @@ func (s *Server) ActualizarSector(w http.ResponseWriter, r *http.Request) {
 
 // BorrarSector atiende DELETE /api/v1/sectores/{id}.
 func (s *Server) BorrarSector(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El Id debe ser un número entero")
 		return

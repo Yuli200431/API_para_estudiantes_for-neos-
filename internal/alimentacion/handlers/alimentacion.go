@@ -3,10 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"for-neos-api/internal/alimentacion/models"
-	"github.com/go-chi/chi/v5"
 )
 
 func (s *Server) ListarAlimentaciones(w http.ResponseWriter, _ *http.Request) {
@@ -14,7 +12,7 @@ func (s *Server) ListarAlimentaciones(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *Server) BuscarAlimentacionesPorID(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "ID inválido")
 		return
@@ -42,7 +40,7 @@ func (s *Server) CrearAlimentacion(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ActualizarAlimentacion(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "ID inválido")
 		return
@@ -61,7 +59,7 @@ func (s *Server) ActualizarAlimentacion(w http.ResponseWriter, r *http.Request) 
 }
 
 func (s *Server) BorrarAlimentacion(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "ID inválido")
 		return
