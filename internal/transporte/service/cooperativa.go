@@ -55,5 +55,8 @@ func validacionCooperativa(a models.Cooperativa) error {
 	if strings.TrimSpace(a.Nombre) == "" {
 		return ErrEstadoVacio
 	}
+	if strings.TrimSpace(a.Telefono) == "" {
+		return ErrEstadoVacio
+	}
 	return nil
 }
