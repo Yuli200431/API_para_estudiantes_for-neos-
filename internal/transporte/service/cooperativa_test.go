@@ -3,14 +3,15 @@ package service_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"for-neos-api/internal/storage"
 	"for-neos-api/internal/transporte/models"
 	"for-neos-api/internal/transporte/service"
 )
 
-// cooperativaRepoMock es un doble de prueba de storage.CooperativaRepository.
 type cooperativaRepoMock struct {
 	mock.Mock
 }
@@ -40,26 +41,43 @@ func (m *cooperativaRepoMock) BorrarCooperativa(id uint) bool {
 	return args.Bool(0)
 }
 
-// TestCooperativaService_Crear comprueba la regla de negocio (validacionCooperativa)
-// de forma aislada, sin tocar la base de datos real.
+// Red de seguridad: el mock DEBE cumplir el contrato de la interfaz.
+var _ storage.CooperativaRepository = (*cooperativaRepoMock)(nil)
+
 func TestCooperativaService_Crear(t *testing.T) {
+	cooperativaValida := models.Cooperativa{
+		Nombre:      "Coop Manta",
+		Telefono:    "099123456",
+		Descripcion: "Cooperativa de prueba",
+	}
+
 	casos := []struct {
 		nombre        string
 		entrada       models.Cooperativa
-		debeFallar    bool
+		errEsperado   error
 		debePersistir bool
 	}{
 		{
+			nombre:        "cooperativa valida",
+			entrada:       cooperativaValida,
+			errEsperado:   nil,
+			debePersistir: true,
+		},
+		{
 			nombre:        "nombre vacio -> error, no se persiste",
-			entrada:       models.Cooperativa{Nombre: "   ", Telefono: "099"},
-			debeFallar:    true,
+			entrada:       models.Cooperativa{Nombre: "", Telefono: "099", Descripcion: "desc"},
+			errEsperado:   service.ErrEstadoVacio,
 			debePersistir: false,
 		},
 		{
-			nombre:        "cooperativa valida -> sin error, se persiste",
-			entrada:       models.Cooperativa{Nombre: "Coop Manta", Telefono: "099123"},
-			debeFallar:    false,
-			debePersistir: true,
+			nombre: "telefono vacio -> error, no se persiste",
+			entrada: func() models.Cooperativa {
+				c := cooperativaValida
+				c.Telefono = ""
+				return c
+			}(),
+			errEsperado:   service.ErrEstadoVacio,
+			debePersistir: false,
 		},
 	}
 
@@ -75,14 +93,26 @@ func TestCooperativaService_Crear(t *testing.T) {
 
 			creada, err := svc.Crear(c.entrada)
 
-			if c.debeFallar {
-				require.Error(t, err)
+			if c.errEsperado != nil {
+				require.ErrorIs(t, err, c.errEsperado)
 				repo.AssertNotCalled(t, "CrearCooperativa")
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, uint(1), creada.ID)
+				assert.Equal(t, uint(1), creada.ID)
 				repo.AssertCalled(t, "CrearCooperativa", c.entrada)
 			}
 		})
 	}
+}
+
+func TestCooperativaService_Obtener_NoEncontrado(t *testing.T) {
+	repo := new(cooperativaRepoMock)
+	repo.On("BuscarCooperativaPorID", uint(999)).Return(models.Cooperativa{}, false)
+
+	svc := service.NuevaCooperaticaService(repo)
+
+	_, err := svc.Obtener(999)
+
+	require.ErrorIs(t, err, service.ErrNoEncontrado)
+	repo.AssertExpectations(t)
 }

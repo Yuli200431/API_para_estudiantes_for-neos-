@@ -1,51 +1,111 @@
-package storage_test
+package storage
 
 import (
 	"testing"
 
 	"github.com/glebarez/sqlite"
-	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 
 	transporteModels "for-neos-api/internal/transporte/models"
-	"for-neos-api/internal/storage"
 )
 
-// abrirDBMemoria crea una base de datos SQLite en memoria, solo para el test.
-// No usa el archivo for-neos-api.db real.
 func abrirDBMemoria(t *testing.T) *gorm.DB {
 	t.Helper()
-
-	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	require.NoError(t, err)
-
-	err = db.AutoMigrate(&transporteModels.Cooperativa{})
-	require.NoError(t, err)
-
-	return db
+	gdb, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("error abriendo sqlite: %v", err)
+	}
+	err = gdb.AutoMigrate(&transporteModels.Cooperativa{})
+	if err != nil {
+		t.Fatalf("error migrando: %v", err)
+	}
+	return gdb
 }
 
-// TestCooperativaRepository_CrearYListar verifica que crear una cooperativa
-// y luego listarla la refleje correctamente, usando GORM contra sqlite :memory:.
-func TestCooperativaRepository_CrearYListar(t *testing.T) {
-	db := abrirDBMemoria(t)
-	almacen := storage.NuevoAlmacenSQLite(db)
+func TestSQLite_CrearYBuscarCooperativa(t *testing.T) {
+	repo := NuevoAlmacenSQLite(abrirDBMemoria(t))
 
-	nueva := transporteModels.Cooperativa{
+	creada := repo.CrearCooperativa(transporteModels.Cooperativa{
 		Nombre:      "Coop Manta",
 		Telefono:    "099123456",
 		Descripcion: "Cooperativa de prueba",
+	})
+
+	if creada.ID == 0 {
+		t.Fatalf("esperaba ID generado")
 	}
 
-	creada := almacen.CrearCooperativa(nueva)
-	require.NotZero(t, creada.ID, "GORM debió asignar un ID autogenerado")
+	encontrada, ok := repo.BuscarCooperativaPorID(creada.ID)
+	if !ok {
+		t.Fatalf("no se encontró la cooperativa")
+	}
+	if encontrada.Nombre != "Coop Manta" {
+		t.Errorf("nombre=%q esperaba=%q", encontrada.Nombre, "Coop Manta")
+	}
 
-	lista := almacen.ListarCooperativas()
-	require.Len(t, lista, 1)
-	require.Equal(t, "Coop Manta", lista[0].Nombre)
+	lista := repo.ListarCooperativas()
+	if len(lista) != 1 {
+		t.Fatalf("esperaba 1 cooperativa")
+	}
+}
 
-	// También probamos buscar por ID, que crear → buscar lo refleje.
-	encontrada, ok := almacen.BuscarCooperativaPorID(creada.ID)
-	require.True(t, ok)
-	require.Equal(t, "Coop Manta", encontrada.Nombre)
+func TestSQLite_BuscarCooperativaInexistente(t *testing.T) {
+	repo := NuevoAlmacenSQLite(abrirDBMemoria(t))
+
+	_, ok := repo.BuscarCooperativaPorID(999)
+	if ok {
+		t.Fatalf("se esperaba no encontrar la cooperativa")
+	}
+}
+
+func TestSQLite_ActualizarCooperativa(t *testing.T) {
+	repo := NuevoAlmacenSQLite(abrirDBMemoria(t))
+
+	creada := repo.CrearCooperativa(transporteModels.Cooperativa{
+		Nombre:      "Coop Manta",
+		Telefono:    "099123456",
+		Descripcion: "Cooperativa de prueba",
+	})
+
+	actualizada, ok := repo.ActualizarCooperativa(creada.ID, transporteModels.Cooperativa{
+		Nombre:      "Coop Costa Azul",
+		Telefono:    "099999999",
+		Descripcion: "Actualizada",
+	})
+
+	if !ok {
+		t.Fatal("no se pudo actualizar la cooperativa")
+	}
+	if actualizada.Nombre != "Coop Costa Azul" {
+		t.Errorf("nombre=%q esperaba=%q", actualizada.Nombre, "Coop Costa Azul")
+	}
+}
+
+func TestSQLite_BorrarCooperativa(t *testing.T) {
+	repo := NuevoAlmacenSQLite(abrirDBMemoria(t))
+
+	creada := repo.CrearCooperativa(transporteModels.Cooperativa{
+		Nombre:      "Coop Manta",
+		Telefono:    "099123456",
+		Descripcion: "Cooperativa de prueba",
+	})
+
+	repo.BorrarCooperativa(creada.ID)
+
+	_, ok := repo.BuscarCooperativaPorID(creada.ID)
+	if ok {
+		t.Fatalf("se esperaba no encontrar la cooperativa después de borrarla")
+	}
+}
+
+func TestSQLite_ListarCooperativas(t *testing.T) {
+	repo := NuevoAlmacenSQLite(abrirDBMemoria(t))
+
+	repo.CrearCooperativa(transporteModels.Cooperativa{Nombre: "Coop 1", Telefono: "099111111", Descripcion: "desc1"})
+	repo.CrearCooperativa(transporteModels.Cooperativa{Nombre: "Coop 2", Telefono: "099222222", Descripcion: "desc2"})
+
+	lista := repo.ListarCooperativas()
+	if len(lista) != 2 {
+		t.Fatalf("esperaba 2 cooperativas, obtuvo %d", len(lista))
+	}
 }
