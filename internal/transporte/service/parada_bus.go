@@ -55,5 +55,8 @@ func validacionParadaBus(a models.ParadaBus) error {
 	if strings.TrimSpace(a.NombreParada) == "" {
 		return ErrEstadoVacio
 	}
+	if strings.TrimSpace(a.Direccion) == "" {
+		return ErrEstadoVacio
+	}
 	return nil
 }
