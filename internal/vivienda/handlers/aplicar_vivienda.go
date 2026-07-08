@@ -12,7 +12,7 @@ import (
 // Recibe el storage por inyección de dependencias desde main.
 // ListarAplicarViviendas atiende GET /api/v1/aplicarviviendas.
 func (s *Server) ListarAplicarViviendas(w http.ResponseWriter, _ *http.Request) {
-	aplicarvivi := s.Aplicar.Listar()
+	aplicarviviendas := s.Aplicar.Listar()
 	RespondJSON(w, http.StatusOK, aplicarviviendas)
 }
 
