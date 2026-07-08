@@ -95,7 +95,7 @@ func (s *AuthService) Login(email, password string) (string, error) {
 	//Luego la condición de que el usuario exista
 	if !existe {
 		//Nada que hacer, retorno el error
-		return "", ErrEmailEnUso
+		return "", ErrCredencialesInvalidas
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password)); err != nil {
 		return "", ErrCredencialesInvalidas

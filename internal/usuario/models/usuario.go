@@ -4,9 +4,9 @@ import "time"
 
 type Usuario struct {
 	ID           int       `json:"id" gorm:"primaryKey"`
-	Nombre       string    `json:"nombre" gorm:"not full;uniqueIndex"`
-	Email        string    `json:"email" gorm:"not full;uniqueIndex"`
+	Nombre       string    `json:"nombre" gorm:"not null"`
+	Email        string    `json:"email" gorm:"not null;uniqueIndex"`
 	PasswordHash string    `json:"-" gorm:"not full"`
 	CreadoEn     time.Time `json:"creado_en"`
-	Rol          string    `gorm:"default:estudiante"`
+	Rol          string    `json:"rol" gorm:"not null;default:estudiante"`
 }
