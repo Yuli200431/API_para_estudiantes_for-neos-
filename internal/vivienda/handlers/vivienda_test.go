@@ -172,7 +172,7 @@ func registrarYObtenerToken(t *testing.T, h http.Handler) string {
 		json.NewDecoder(rec.Body).Decode(&resp),
 	)
 
-	return resp.Token
+	return nil
 }
 
 // TestCrearVivienda_Exitoso: POST con token y cuerpo valido -> 201 Created.
