@@ -138,7 +138,7 @@ func TestAgregarCooperativa_ConToken_201(t *testing.T) {
 
 	h.ServeHTTP(rec, req)
 
-	require.Equal(t, http.StatusTeapot, rec.Code)
+	require.Equal(t, http.StatusCreated, rec.Code)
 
 	var creada models.Cooperativa
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&creada))
