@@ -6,6 +6,12 @@ import (
 	alimentacionModels "for-neos-api/internal/alimentacion/models"
 	transporteModels "for-neos-api/internal/transporte/models"
 	viviendaModels "for-neos-api/internal/vivienda/models"
+
+	usuarioModels "for-neos-api/internal/usuario/models"
+
+	"log"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AlmacenSQLite struct {
@@ -450,6 +456,21 @@ func (a *AlmacenSQLite) BorrarParada(id uint) bool {
 }
 
 func (a *AlmacenSQLite) SembrarSiVacio() {
+	// =========
+	// USUARIO ADMIN — siempre se verifica, independiente de otros datos
+	// =========
+	var u int64
+	a.db.Model(&usuarioModels.Usuario{}).Where("rol = ?", "admin").Count(&u)
+	if u == 0 {
+		hash, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
+		result := a.db.Save(&usuarioModels.Usuario{
+			Nombre:       "Administrador",
+			Email:        "administrador@forneos.com",
+			PasswordHash: string(hash),
+			Rol:          "admin",
+		})
+		log.Printf("Admin creado: %v, error: %v", result.RowsAffected, result.Error)
+	}
 	var n int64
 
 	// Revisamos una tabla principal

@@ -164,24 +164,29 @@ func run(cfg config.Config) error {
 			r.Put("/resenas/{id}", servidorAlimentacion.ActualizarResena)
 			r.Delete("/resenas/{id}", servidorAlimentacion.BorrarResena)
 
-			// Transporte
+			// Transporte — cualquier usuario autenticado puede VER
 			r.Get("/transporte", transporteServidor.ListarRutas)
-			r.Post("/transporte", transporteServidor.AgregarRuta)
 			r.Get("/transporte/{id}", transporteServidor.ObtenerRutaPorID)
+			r.Get("/cooperativa", transporteServidor.ListarCooperativas)
+			r.Get("/cooperativa/{id}", transporteServidor.ObtenerCooperativaPorID)
+			r.Get("/paradas", transporteServidor.ListarParadas)
+			r.Get("/paradas/{id}", transporteServidor.ObtenerParadaPorID)
+		})
+
+		// Transporte — solo ADMIN puede crear, editar, eliminar
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Auth(auth))
+			r.Use(middleware.RequiereRol("admin"))
+
+			r.Post("/transporte", transporteServidor.AgregarRuta)
 			r.Put("/transporte/{id}", transporteServidor.ActualizarRuta)
 			r.Delete("/transporte/{id}", transporteServidor.EliminarRuta)
 
-			// Cooperativas
-			r.Get("/cooperativa", transporteServidor.ListarCooperativas)
 			r.Post("/cooperativa", transporteServidor.AgregarCooperativa)
-			r.Get("/cooperativa/{id}", transporteServidor.ObtenerCooperativaPorID)
 			r.Put("/cooperativa/{id}", transporteServidor.ActualizarCooperativa)
 			r.Delete("/cooperativa/{id}", transporteServidor.EliminarCooperativa)
 
-			// Paradas
-			r.Get("/paradas", transporteServidor.ListarParadas)
 			r.Post("/paradas", transporteServidor.AgregarParada)
-			r.Get("/paradas/{id}", transporteServidor.ObtenerParadaPorID)
 			r.Put("/paradas/{id}", transporteServidor.ActualizarParada)
 			r.Delete("/paradas/{id}", transporteServidor.EliminarParada)
 		})
