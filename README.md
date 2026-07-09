@@ -55,4 +55,136 @@ Team Members
 - Joyce
 - Pablo
 
+# Tecnologías utilizadas
+
+- Go 1.26
+- Chi Router
+- GORM
+- SQLite
+- PostgreSQL
+- JWT
+- Docker
+- Docker Compose
+- GitHub Actions
+
+---
+
+# Arquitectura
+
+La aplicación sigue una arquitectura por capas.
+
+```
+cmd/
+internal/
+    alimentacion/
+        handlers/
+        models/
+        service/
+
+    transporte/
+        handlers/
+        models/
+        service/
+
+    vivienda/
+        handlers/
+        models/
+        service/
+
+    usuario/
+        handlers/
+        models/
+        service/
+
+    config/
+    httpserver/
+    middleware/
+    storage/
+```
+
+Cada módulo se encuentra dividido en:
+
+- Models
+- Service
+- Handlers
+
+Además existen componentes compartidos para:
+
+- Configuración
+- Middleware
+- Storage
+- HTTP Server
+
+---
+
+# Funcionalidades
+
+## Autenticación
+
+- Registro de usuarios
+- Login
+- JWT
+- Middleware de autenticación
+
+---
+
+## Viviendas
+
+- CRUD Viviendas
+- CRUD Fotos
+- CRUD Sectores
+- CRUD Aplicar Vivienda
+
+---
+
+## Alimentación
+
+- CRUD Alimentación
+- CRUD Menú Diario
+- CRUD Platos
+- CRUD Reseñas
+
+---
+
+## Transporte
+
+- CRUD Rutas
+- CRUD Cooperativas
+- CRUD Paradas
+
+---
+
+# Patrones implementados
+
+## Factory
+
+Centraliza la inicialización del almacenamiento.
+
+Archivo:
+
+```
+internal/storage/factory.go
+```
+
+Permite cambiar entre SQLite y PostgreSQL sin modificar la lógica de negocio.
+
+---
+
+## Options Pattern
+
+Utilizado para configurar el servicio de autenticación.
+
+Permite inyectar:
+
+- secreto JWT
+- duración del token
+
+sin utilizar variables globales.
+
+---
+
+## Parameter Object
+
+Los handlers
+
 
