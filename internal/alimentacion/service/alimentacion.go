@@ -37,10 +37,12 @@ func (s *AlimentacionService) Actualizar(id int, a models.Alimentacion) (models.
 	if err := validacionAlimentacion(a); err != nil {
 		return models.Alimentacion{}, err
 	}
+
 	actualizado, ok := s.repo.ActualizarAlimentacion(id, a)
 	if !ok {
 		return models.Alimentacion{}, ErrNoEncontrado
 	}
+
 	return actualizado, nil
 }
 
@@ -51,15 +53,40 @@ func (s *AlimentacionService) Borrar(id int) error {
 	return nil
 }
 
+
 func validacionAlimentacion(a models.Alimentacion) error {
+
 	if strings.TrimSpace(a.NombreLocal) == "" {
 		return ErrNombreVacio
 	}
+
 	if strings.TrimSpace(a.Descripcion) == "" {
 		return ErrDescripcionVacio
 	}
-	if a.PrecioPromedio < 0 {
+
+	if strings.TrimSpace(a.Ubicacion) == "" {
+		return ErrUbicacionVacia
+	}
+
+	if strings.TrimSpace(a.Direccion) == "" {
+		return ErrDireccionVacia
+	}
+
+	if strings.TrimSpace(a.Telefono) == "" {
+		return ErrTelefonoVacio
+	}
+
+	if strings.TrimSpace(a.TipoComida) == "" {
+		return ErrTipoComidaVacia
+	}
+
+	if a.PrecioPromedio <= 0 {
 		return ErrPrecioVacio
 	}
+
+	if a.ProviderID == 0 {
+		return ErrNoEncontrado
+	}
+
 	return nil
 }

@@ -62,3 +62,47 @@ func TestAlimentacionGORM_BuscarInexistente(t *testing.T) {
 	_, ok := repo.BuscarAlimentacionPorID(999)
 	require.False(t, ok)
 }
+
+// TestAlimentacionGORM_Actualizar prueba que un registro existente puede modificarse.
+func TestAlimentacionGORM_Actualizar(t *testing.T) {
+	db := abrirDBPrueba(t)
+	repo := storage.NuevoAlimentacionGORM(db)
+
+	creado := repo.CrearAlimentacion(alimentacionModels.Alimentacion{
+		NombreLocal:    "Comedor ULEAM",
+		Descripcion:    "Comida inicial",
+		PrecioPromedio: 2.50,
+	})
+
+	actualizado, ok := repo.ActualizarAlimentacion(creado.ID, alimentacionModels.Alimentacion{
+		NombreLocal:    "Comedor Actualizado",
+		Descripcion:    "Nueva descripcion",
+		PrecioPromedio: 3.00,
+	})
+
+	require.True(t, ok, "deberia actualizar correctamente")
+	require.Equal(t, "Comedor Actualizado", actualizado.NombreLocal)
+	require.Equal(t, "Nueva descripcion", actualizado.Descripcion)
+	require.Equal(t, 3.00, actualizado.PrecioPromedio)
+}
+
+
+// TestAlimentacionGORM_Borrar prueba que un registro puede eliminarse.
+func TestAlimentacionGORM_Borrar(t *testing.T) {
+	db := abrirDBPrueba(t)
+	repo := storage.NuevoAlimentacionGORM(db)
+
+	creado := repo.CrearAlimentacion(alimentacionModels.Alimentacion{
+		NombreLocal:    "Comedor ULEAM",
+		Descripcion:    "Registro para eliminar",
+		PrecioPromedio: 2.50,
+	})
+
+	eliminado := repo.BorrarAlimentacion(creado.ID)
+
+	require.True(t, eliminado, "deberia eliminar correctamente")
+
+	_, ok := repo.BuscarAlimentacionPorID(creado.ID)
+
+	require.False(t, ok, "no deberia encontrar el registro eliminado")
+}
