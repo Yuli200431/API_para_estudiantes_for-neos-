@@ -194,15 +194,17 @@ func (a *AlmacenSQLite) ListarAlimentaciones() []alimentacionModels.Alimentacion
 
 func (a *AlmacenSQLite) BuscarAlimentacionPorID(id int) (alimentacionModels.Alimentacion, bool) {
 	var alimentacion alimentacionModels.Alimentacion
-	if err := a.db.First(&a, id).Error; err != nil {
-		// Absorbemos el error de la DB y conservamos la firma comma-ok.
+
+	if err := a.db.First(&alimentacion, id).Error; err != nil {
 		return alimentacionModels.Alimentacion{}, false
 	}
+
 	return alimentacion, true
 }
 
 func (a *AlmacenSQLite) CrearAlimentacion(alimentacion alimentacionModels.Alimentacion) alimentacionModels.Alimentacion {
-	a.db.Create(&a) // GORM rellena el ID autogenerado en &a
+	a.db.Create(&alimentacion)
+
 	return alimentacion
 }
 
