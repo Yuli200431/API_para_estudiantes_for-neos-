@@ -26,13 +26,14 @@ import (
 // FAKE REPOSITORY ALIMENTACION
 // ===============================
 
+//sirve para crear un repositorio de alimentacion//
 type alimentacionRepoFake struct {
 	mu     sync.Mutex
 	datos  map[int]models.Alimentacion
 	nextID int
 }
 
-
+//crea un repositorio de alimentacion vacio//
 func nuevoAlimentacionRepoFake() *alimentacionRepoFake {
 	return &alimentacionRepoFake{
 		datos:  make(map[int]models.Alimentacion),
@@ -40,7 +41,7 @@ func nuevoAlimentacionRepoFake() *alimentacionRepoFake {
 	}
 }
 
-
+//ListarAlimentaciones devuelve la lista de alimentaciones//
 func (f *alimentacionRepoFake) ListarAlimentaciones() []models.Alimentacion {
 
 	f.mu.Lock()
@@ -55,7 +56,7 @@ func (f *alimentacionRepoFake) ListarAlimentaciones() []models.Alimentacion {
 	return lista
 }
 
-
+//BuscarAlimentacionPorID devuelve la alimentacion con el ID dado//
 func (f *alimentacionRepoFake) BuscarAlimentacionPorID(id int) (models.Alimentacion, bool) {
 
 	f.mu.Lock()
@@ -66,7 +67,7 @@ func (f *alimentacionRepoFake) BuscarAlimentacionPorID(id int) (models.Alimentac
 	return a, ok
 }
 
-
+//CrearAlimentacion agrega una alimentacion nueva y devuelve la alimentacion con ID asignado//
 func (f *alimentacionRepoFake) CrearAlimentacion(a models.Alimentacion) models.Alimentacion {
 
 	f.mu.Lock()
@@ -80,7 +81,7 @@ func (f *alimentacionRepoFake) CrearAlimentacion(a models.Alimentacion) models.A
 	return a
 }
 
-
+//ActualizarAlimentacion reemplaza la alimentacion con el ID dado//
 func (f *alimentacionRepoFake) ActualizarAlimentacion(id int, datos models.Alimentacion) (models.Alimentacion, bool) {
 
 	f.mu.Lock()
@@ -98,7 +99,7 @@ func (f *alimentacionRepoFake) ActualizarAlimentacion(id int, datos models.Alime
 	return datos, true
 }
 
-
+//BorrarAlimentacion elimina la alimentacion con el ID dado//
 func (f *alimentacionRepoFake) BorrarAlimentacion(id int) bool {
 
 	f.mu.Lock()
@@ -120,13 +121,13 @@ func (f *alimentacionRepoFake) BorrarAlimentacion(id int) bool {
 // ===============================
 // FAKE USUARIO
 // ===============================
-
+//sirve para crear un repositorio de usuario//
 type usuarioRepoFake struct {
 	porEmail map[string]usuarioModels.Usuario
 	nextID int
 }
 
-
+//crea un repositorio de usuario vacio//
 func nuevoUsuarioRepoFake() *usuarioRepoFake {
 
 	return &usuarioRepoFake{
@@ -135,7 +136,7 @@ func nuevoUsuarioRepoFake() *usuarioRepoFake {
 	}
 }
 
-
+//CrearUsuario agrega un usuario nuevo y devuelve el usuario con ID asignado//
 func (f *usuarioRepoFake) CrearUsuario(u usuarioModels.Usuario)(usuarioModels.Usuario,error){
 
 	u.ID=f.nextID
@@ -146,7 +147,7 @@ func (f *usuarioRepoFake) CrearUsuario(u usuarioModels.Usuario)(usuarioModels.Us
 	return u,nil
 }
 
-
+//BuscarUsuarioPorEmail devuelve el usuario con el email dado//
 func (f *usuarioRepoFake) BuscarUsuarioPorEmail(email string)(usuarioModels.Usuario,bool){
 
 	u,ok:=f.porEmail[email]
